@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "743172680177",
+    "project_id": "popbill-prototype",
+    "storage_bucket": "popbill-prototype.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:743172680177:android:53f6dbb1f306de71c8fc50",
+        "android_client_info": {
+          "package_name": "com.example.popbill"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeQccg8sbq5M0dnFxSBl6w9oRRF6Mhw_E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
