@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:popbill/screens/auth.dart';
+import 'package:popbill/screens/authorisation.dart';
 import 'package:popbill/screens/splash.dart';
 import 'package:popbill/screens/temp.dart';
 import 'firebase_options.dart';
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       title: 'PopBill',
       theme: ThemeData.light().copyWith(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 239, 169, 58),
+          seedColor: const Color.fromARGB(255, 241, 235, 144),
         ),
         useMaterial3: true,
         textTheme: GoogleFonts.latoTextTheme(),
@@ -39,7 +39,7 @@ class MyApp extends StatelessWidget {
             }
             return const TempScreen();
           }
-          return const AuthScreen();
+          return const AuthorisationScreen();
         }),
       ),
     );
