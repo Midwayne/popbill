@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:popbill/widgets/authorisation/app_details.dart';
 import 'package:popbill/widgets/authorisation/service_login.dart';
 
 class AuthorisationScreen extends StatelessWidget {
@@ -8,32 +9,17 @@ class AuthorisationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
+      body: const Center(
         child: SingleChildScrollView(
           child: Column(
             //crossAxisAlignment: CrossAxisAlignment.center,
             //mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                'PopBill',
-                style: TextStyle(
-                  fontSize: 80,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Manage expenses. Split bills',
-                style: TextStyle(
-                  fontSize: 20,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              ),
-              const SizedBox(height: 50),
-              const Card(
+              AppDetails(),
+              SizedBox(height: 50),
+              Card(
                 elevation: 10,
-                margin: EdgeInsets.symmetric(horizontal: 20),
+                margin: EdgeInsets.symmetric(horizontal: 40),
                 child: ServiceLogin(),
               ),
             ],
