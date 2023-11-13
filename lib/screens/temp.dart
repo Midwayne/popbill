@@ -11,8 +11,8 @@ class TempScreen extends StatelessWidget {
         title: const Text('PopBill'),
         actions: [
           IconButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
             },
             icon: Icon(
               Icons.exit_to_app,

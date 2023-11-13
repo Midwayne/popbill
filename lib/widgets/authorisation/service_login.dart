@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:popbill/services/auth_services.dart';
@@ -9,26 +8,6 @@ class ServiceLogin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void invokeLogin(Function typeOfService) {
-      try {
-        //AuthService().signInWithGoogle();
-        typeOfService();
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Welcome!'),
-          ),
-        );
-      } on FirebaseAuthException catch (error) {
-        ScaffoldMessenger.of(context).clearSnackBars();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(error.message ?? 'Authentication failed.'),
-          ),
-        );
-      }
-    }
-
     return Column(
       children: [
         const Padding(
@@ -68,8 +47,7 @@ class ServiceLogin extends StatelessWidget {
             IconButton(
               padding: EdgeInsets.zero,
               onPressed: () {
-                //AuthService().signInWithGoogle();
-                invokeLogin(AuthService().signInWithGoogle());
+                AuthService().signInWithGoogle(context);
               },
               icon: SvgPicture.asset(
                 "assets/icons/google.svg",
