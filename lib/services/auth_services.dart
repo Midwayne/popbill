@@ -98,4 +98,28 @@ class AuthService {
       );
     }
   }
+
+  void signOut() async {
+    await FirebaseAuth.instance.signOut();
+  }
+
+  void deleteAccount(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.currentUser?.delete();
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account deleted successfully!'),
+        ),
+      );
+    } on FirebaseAuthException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message ?? 'An unexpected error occurred.'),
+        ),
+      );
+    }
+  }
 }

@@ -7,11 +7,10 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('PopBill'),
-      ),
-      body: const Center(
-        child: Text('Loading...'),
+      backgroundColor: Theme.of(context).colorScheme.primary,
+      body: Center(
+        child: CircularProgressIndicator(
+            backgroundColor: Theme.of(context).colorScheme.onPrimary),
       ),
     );
   }

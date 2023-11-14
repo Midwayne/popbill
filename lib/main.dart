@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/services.dart';
 import 'package:popbill/screens/authorisation.dart';
+import 'package:popbill/screens/home.dart';
 import 'package:popbill/screens/splash.dart';
-import 'package:popbill/screens/temp.dart';
 import 'firebase_options.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -37,7 +39,7 @@ class MyApp extends StatelessWidget {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SplashScreen();
             }
-            return const TempScreen();
+            return const HomeScreen();
           }
           return const AuthorisationScreen();
         }),

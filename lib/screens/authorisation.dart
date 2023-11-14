@@ -7,20 +7,22 @@ class AuthorisationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.of(context).devicePixelRatio;
     return Scaffold(
       backgroundColor: Theme.of(context).colorScheme.primary,
-      body: const Center(
+      body: Center(
         child: SingleChildScrollView(
           child: Column(
             //crossAxisAlignment: CrossAxisAlignment.center,
             //mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AppDetails(),
-              SizedBox(height: 50),
+              const AppDetails(),
+              //SizedBox(height: 50),
+              SizedBox(height: 14.5 * deviceSize),
               Card(
                 elevation: 10,
-                margin: EdgeInsets.symmetric(horizontal: 40),
-                child: ServiceLogin(),
+                margin: EdgeInsets.symmetric(horizontal: 11.5 * deviceSize),
+                child: const ServiceLogin(),
               ),
             ],
           ),
