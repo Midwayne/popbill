@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:popbill/models/user_expense.dart';
 
 class AuthService {
   Future<UserCredential?> signUpWithEmail(BuildContext context,
@@ -122,4 +124,89 @@ class AuthService {
       );
     }
   }
+
+  void addUserExpense(BuildContext context, UserExpense expense) async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    try {
+      CollectionReference expensesReference = FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('expenses');
+
+      await expensesReference.add({
+        'title': expense.title,
+        'amount': expense.amount,
+        'date': {
+          'day': expense.date.day,
+          'month': expense.date.month,
+          'year': expense.date.year,
+        },
+        'time': {
+          'hour': expense.time.hour,
+          'minute': expense.time.minute,
+          //'period': expense.time.period == DayPeriod.am ? 'AM' : 'PM',
+        },
+      });
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Expense added.'),
+        ),
+      );
+    } catch (error) {
+      print(error);
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'An unexpected error occurred while adding expense.\nPlease try again'),
+        ),
+      );
+    }
+  }
+
+  Future<List<UserExpense>> getExpenses() async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    List<UserExpense> expenses = [];
+    String title;
+    double amount;
+    DateTime date;
+    TimeOfDay time;
+    try {
+      QuerySnapshot expensesSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('expenses')
+          //Multiple orderBy cause null. Try to fix this
+          /*.orderBy('date.year', descending: true)
+          .orderBy('date.month', descending: true)
+          .orderBy('date.day', descending: true)
+          .orderBy('time.hour', descending: true)
+          .orderBy('time.minute', descending: true)*/
+          .get();
+
+      for (var expenseDoc in expensesSnapshot.docs) {
+        var expense = expenseDoc.data() as dynamic;
+
+        title = expense['title'];
+
+        amount = expense['amount'];
+
+        date = DateTime(expense['date']['year'], expense['date']['month'],
+            expense['date']['day']);
+        time = TimeOfDay(
+            hour: expense['time']['hour'], minute: expense['time']['minute']);
+
+        expenses.add(UserExpense(
+            title: expense['title'], amount: amount, date: date, time: time));
+      }
+
+      return expenses;
+    } catch (error) {
+      return expenses;
+    }
+  }
+
+  void removeUserExpense(BuildContext context, UserExpense expense) async {}
 }

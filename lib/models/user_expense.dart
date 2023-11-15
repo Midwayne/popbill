@@ -15,7 +15,7 @@ class UserExpense {
   final String title;
   final double amount;
   final DateTime date;
-  final TimeOfDay? time;
+  final TimeOfDay time;
 
   String get formattedDate {
     return dateFormatter.format(date);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:popbill/models/user_expense.dart';
 import 'package:intl/intl.dart';
+import 'package:popbill/services/auth_services.dart';
 
 class AddExpense extends StatefulWidget {
   const AddExpense({super.key});
@@ -61,6 +62,15 @@ class _AddExpenseState extends State<AddExpense> {
 
       _form.currentState!.save();
       _form.currentState!.reset();
+
+      UserExpense expense = UserExpense(
+        title: title,
+        amount: price,
+        date: selectedDate,
+        time: selectedTime,
+      );
+
+      AuthService().addUserExpense(context, expense);
     }
 
     return Center(
