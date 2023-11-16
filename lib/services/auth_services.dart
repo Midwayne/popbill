@@ -148,6 +148,8 @@ class AuthService {
         },
       });
 
+      Navigator.of(context).pop();
+
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

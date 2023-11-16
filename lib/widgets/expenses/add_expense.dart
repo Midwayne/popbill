@@ -52,6 +52,7 @@ class _AddExpenseState extends State<AddExpense> {
 
   @override
   Widget build(BuildContext context) {
+    final deviceSize = MediaQuery.of(context).devicePixelRatio;
     void submit() async {
       FocusManager.instance.primaryFocus?.unfocus();
       final isValid = _form.currentState!.validate();
@@ -73,107 +74,115 @@ class _AddExpenseState extends State<AddExpense> {
       AuthService().addUserExpense(context, expense);
     }
 
-    return Center(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.all(MediaQuery.of(context).devicePixelRatio * 10),
-        child: Form(
-          key: _form,
-          child: Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(
-                          labelText: 'Title*', hintText: 'Food'),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter a title';
-                        }
-                        title = value;
-                        return null;
-                      },
-                    ),
-                  ),
-                  SizedBox(width: MediaQuery.of(context).devicePixelRatio * 10),
-                  SizedBox(
-                    width: MediaQuery.of(context).devicePixelRatio * 35,
-                    child: TextFormField(
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                          labelText: 'Amount*', hintText: '19.99'),
-                      inputFormatters: [
-                        FilteringTextInputFormatter
-                            .singleLineFormatter, // No line break
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
-                      ],
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter the price';
-                        }
-                        try {
-                          price = double.parse(value);
-                          print(price);
-                          return null; // Return null if parsing is successful
-                        } catch (e) {
-                          return 'Not a number';
-                        }
-                      },
-                    ),
-                  ),
-                ],
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(
+        horizontal: deviceSize * 10,
+        //vertical: deviceSize * 20,
+      ),
+      child: Form(
+        key: _form,
+        child: Column(
+          children: [
+            Text(
+              'Add an expense',
+              style: TextStyle(
+                fontSize: Theme.of(context).textTheme.headlineSmall!.fontSize,
               ),
-              SizedBox(height: MediaQuery.of(context).devicePixelRatio * 5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Date: ${selectedDateFormatter.format(selectedDate)}',
+            ),
+            SizedBox(width: deviceSize * 10),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    keyboardType: TextInputType.text,
+                    decoration: const InputDecoration(
+                        labelText: 'Title*', hintText: 'Food'),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a title';
+                      }
+                      title = value;
+                      return null;
+                    },
+                  ),
+                ),
+                SizedBox(width: deviceSize * 10),
+                SizedBox(
+                  width: deviceSize * 35,
+                  child: TextFormField(
+                    keyboardType:
+                        const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                        labelText: 'Amount*', hintText: '19.99'),
+                    inputFormatters: [
+                      FilteringTextInputFormatter
+                          .singleLineFormatter, // No line break
+                      FilteringTextInputFormatter.allow(
+                          RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
+                    ],
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter the price';
+                      }
+                      try {
+                        price = double.parse(value);
+                        print(price);
+                        return null; // Return null if parsing is successful
+                      } catch (e) {
+                        return 'Not a number';
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: deviceSize * 5),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Date: ${selectedDateFormatter.format(selectedDate)}',
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.calendar_today),
+                  onPressed: () => _selectDate(context),
+                ),
+              ],
+            ),
+            SizedBox(height: deviceSize * 2),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Time: ${selectedTime.format(context)}',
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.access_time),
+                  onPressed: () => _selectTime(context),
+                ),
+              ],
+            ),
+            SizedBox(height: deviceSize * 5),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  style: const ButtonStyle(
+                    elevation: MaterialStatePropertyAll(6),
+                  ),
+                  onPressed: submit,
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(
+                      fontSize: 16,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: MediaQuery.of(context).devicePixelRatio * 2),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Time: ${selectedTime.format(context)}',
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.access_time),
-                    onPressed: () => _selectTime(context),
-                  ),
-                ],
-              ),
-              SizedBox(height: MediaQuery.of(context).devicePixelRatio * 5),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  ElevatedButton(
-                    style: const ButtonStyle(
-                      elevation: MaterialStatePropertyAll(6),
-                    ),
-                    onPressed: submit,
-                    child: const Text(
-                      'Add',
-                      style: TextStyle(
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
