@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:popbill/widgets/expenses/add_expense.dart';
 import 'package:popbill/widgets/expenses/all_transactions.dart';
@@ -14,29 +16,6 @@ class ExpensesPage extends StatefulWidget {
 class _ExpensesPageState extends State<ExpensesPage> {
   @override
   Widget build(BuildContext context) {
-    /*
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          toolbarHeight: 0,
-          bottom: const TabBar(
-            tabs: [
-              Tab(text: 'Add'),
-              Tab(text: 'This month'),
-              Tab(text: 'All transactions'),
-            ],
-          ),
-        ),
-        body: const TabBarView(
-          children: [
-            AddExpense(),
-            ThisMonth(),
-            AllTransactions(),
-          ],
-        ),
-      ),
-    );*/
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -60,7 +39,14 @@ class _ExpensesPageState extends State<ExpensesPage> {
           color: Theme.of(context).colorScheme.onSecondary,
         ),
       ),
-      body: AllTransactions(),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection('expenses')
+            .snapshots(),
+        builder: (context, snapshot) => const AllTransactions(),
+      ),
     );
   }
 }

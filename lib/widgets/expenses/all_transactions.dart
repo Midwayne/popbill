@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:popbill/models/user_expense.dart';
 import 'package:popbill/services/auth_services.dart';
+
+// Currently this shows only the current month's expenses.
+// Add a filter in the appbar to choose any month's expenses.
+//Use riverpod to store the total amount spent in a month
 
 class AllTransactions extends StatefulWidget {
   const AllTransactions({super.key});
@@ -15,12 +21,18 @@ class AllTransactions extends StatefulWidget {
 class _AllTransactionsState extends State<AllTransactions> {
   late Future<List<UserExpense>> expenses;
 
-  Future<List<UserExpense>> getData() async {
-    return await AuthService().getExpenses();
+  Future<List<UserExpense>> _getData() async {
+    return await AuthService().getExpenses(
+      filterYear: DateTime.now().year,
+      filterMonth: DateTime.now().month,
+    );
   }
 
   Future<void> _pullRefresh() async {
-    List<UserExpense> freshExpenses = await AuthService().getExpenses();
+    List<UserExpense> freshExpenses = await AuthService().getExpenses(
+      filterYear: DateTime.now().year,
+      filterMonth: DateTime.now().month,
+    );
     setState(() {
       expenses = Future.value(freshExpenses);
     });
@@ -29,7 +41,7 @@ class _AllTransactionsState extends State<AllTransactions> {
   @override
   void initState() {
     super.initState();
-    expenses = getData();
+    expenses = _getData();
   }
 
   @override
@@ -45,10 +57,12 @@ class _AllTransactionsState extends State<AllTransactions> {
       return selectedDateFormatter.format(expenseDate).toString();
     }
 
+    double monthlyExpenses = 0;
+
     return Center(
       child: FutureBuilder<List<UserExpense>>(
         future: expenses,
-        builder: (context, snapshot) {
+        builder: (ctx1, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
@@ -56,70 +70,76 @@ class _AllTransactionsState extends State<AllTransactions> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Text('No expenses found.');
           } else {
-            return RefreshIndicator(
-              onRefresh: _pullRefresh,
-              child: ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  UserExpense expense = snapshot.data![index];
-                  /*return ListTile(
-                      title: Text(expense.title),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Rs. ${expense.amount.toStringAsFixed(2)}'),
-                          Text(
-                              'Date: ${expense.date.toLocal()}'), // Convert to local time
-                          Text('Time: ${expense.time}'),
-                        ],
+            return Scaffold(
+              body: RefreshIndicator(
+                onRefresh: _pullRefresh,
+                child: ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (ctx2, index) {
+                    UserExpense expense = snapshot.data![index];
+                    monthlyExpenses += expense.amount;
+                    print(monthlyExpenses);
+                    return Dismissible(
+                      key: Key(expense.title),
+                      background: Container(
+                        color: Colors.red,
+                        child: const Align(
+                          alignment: Alignment.centerRight,
+                          child: Icon(
+                            Icons.delete,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    );*/
-                  return Padding(
-                    padding: EdgeInsets.all(deviceSize * 2),
-                    child: ListTile(
-                      //elevation: 3,
-                      subtitle: Column(children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Container(
-                              child: Text(
-                                expense.title,
-                                style: TextStyle(
-                                  fontSize: Theme.of(context)
-                                      .textTheme
-                                      .titleLarge!
-                                      .fontSize,
-                                  fontWeight: FontWeight.bold,
+                      onDismissed: (direction) {
+                        AuthService().removeUserExpense(context, expense);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.all(deviceSize * 2),
+                        child: ListTile(
+                          //elevation: 3,
+                          subtitle: Column(children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  expense.title,
+                                  style: TextStyle(
+                                    fontSize: Theme.of(context)
+                                        .textTheme
+                                        .titleLarge!
+                                        .fontSize,
+                                    fontWeight: FontWeight.bold,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                Text(
+                                  'Rs. ${expense.amount.toStringAsFixed(2)}',
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                              ),
+                              ],
                             ),
-                            Text(
-                              'Rs. ${expense.amount.toStringAsFixed(2)}',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Date: ${selectedDate(expense.date)}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  'Time: ${selectedTime(expense.time)}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            )
+                          ]),
                         ),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              'Date: ${selectedDate(expense.date)}',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              'Time: ${selectedTime(expense.time)}',
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        )
-                      ]),
-                    ),
-                  );
-                },
+                      ),
+                    );
+                  },
+                ),
               ),
             );
           }

@@ -5,6 +5,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:popbill/models/user_expense.dart';
 
 class AuthService {
+  // final uuid = const Uuid();
   Future<UserCredential?> signUpWithEmail(BuildContext context,
       TextEditingController email, TextEditingController password) async {
     try {
@@ -125,15 +126,18 @@ class AuthService {
     }
   }
 
-  void addUserExpense(BuildContext context, UserExpense expense) async {
+  Future<bool> addUserExpense(BuildContext context, UserExpense expense) async {
     final currentUser = FirebaseAuth.instance.currentUser!;
     try {
       CollectionReference expensesReference = FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
-          .collection('expenses');
+          .collection('expenses')
+          .doc('${expense.date.year}')
+          .collection('${expense.date.month}');
 
-      await expensesReference.add({
+      await expensesReference.doc(expense.id).set({
+        'id': expense.id,
         'title': expense.title,
         'amount': expense.amount,
         'date': {
@@ -144,52 +148,39 @@ class AuthService {
         'time': {
           'hour': expense.time.hour,
           'minute': expense.time.minute,
-          //'period': expense.time.period == DayPeriod.am ? 'AM' : 'PM',
         },
       });
 
-      Navigator.of(context).pop();
-
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Expense added.'),
-        ),
-      );
+      return true;
     } catch (error) {
-      print(error);
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'An unexpected error occurred while adding expense.\nPlease try again'),
-        ),
-      );
+      return false;
     }
   }
 
-  Future<List<UserExpense>> getExpenses() async {
+  Future<List<UserExpense>> getExpenses(
+      {required int filterYear, required int filterMonth}) async {
     final currentUser = FirebaseAuth.instance.currentUser!;
     List<UserExpense> expenses = [];
+    String id;
     String title;
     double amount;
     DateTime date;
     TimeOfDay time;
     try {
-      QuerySnapshot expensesSnapshot = await FirebaseFirestore.instance
+      CollectionReference expensesReference = FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
           .collection('expenses')
-          //Multiple orderBy cause null. Try to fix this
-          /*.orderBy('date.year', descending: true)
-          .orderBy('date.month', descending: true)
-          .orderBy('date.day', descending: true)
-          .orderBy('time.hour', descending: true)
-          .orderBy('time.minute', descending: true)*/
-          .get();
+          .doc('$filterYear')
+          .collection('$filterMonth');
+
+      QuerySnapshot expensesSnapshot =
+          await expensesReference.orderBy('date.day', descending: true).get();
 
       for (var expenseDoc in expensesSnapshot.docs) {
         var expense = expenseDoc.data() as dynamic;
+
+        id = expense['id'];
 
         title = expense['title'];
 
@@ -201,7 +192,7 @@ class AuthService {
             hour: expense['time']['hour'], minute: expense['time']['minute']);
 
         expenses.add(UserExpense(
-            title: expense['title'], amount: amount, date: date, time: time));
+            id: id, title: title, amount: amount, date: date, time: time));
       }
 
       return expenses;
@@ -210,5 +201,38 @@ class AuthService {
     }
   }
 
-  void removeUserExpense(BuildContext context, UserExpense expense) async {}
+  void removeUserExpense(BuildContext context, UserExpense expense) async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('expenses')
+          .doc('${expense.date.year}')
+          .collection('${expense.date.month}')
+          .doc(expense.id)
+          .delete();
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Expense deleted.'),
+          action: SnackBarAction(
+            label: 'Undo',
+            onPressed: () {
+              addUserExpense(context, expense);
+            },
+          ),
+        ),
+      );
+    } catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'An unexpected error occurred while deleting expense.\nPlease try again'),
+        ),
+      );
+    }
+  }
 }

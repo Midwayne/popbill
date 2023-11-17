@@ -27,7 +27,7 @@ class _AddExpenseState extends State<AddExpense> {
       context: context,
       initialDate: selectedDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2101),
+      lastDate: DateTime.now(),
     );
 
     if (picked != null && picked != selectedDate) {
@@ -71,7 +71,28 @@ class _AddExpenseState extends State<AddExpense> {
         time: selectedTime,
       );
 
-      AuthService().addUserExpense(context, expense);
+      final Future<bool> returnCode =
+          AuthService().addUserExpense(context, expense);
+
+      if (returnCode != true) {
+        Navigator.of(context).pop();
+
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expense added.'),
+          ),
+        );
+      } else {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+                'An unexpected error occurred while adding expense.\nPlease try again'),
+          ),
+        );
+      }
     }
 
     return SingleChildScrollView(
@@ -126,7 +147,6 @@ class _AddExpenseState extends State<AddExpense> {
                       }
                       try {
                         price = double.parse(value);
-                        print(price);
                         return null; // Return null if parsing is successful
                       } catch (e) {
                         return 'Not a number';
