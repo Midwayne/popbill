@@ -13,6 +13,7 @@ class AuthorisationScreen extends StatelessWidget {
       body: Center(
         child: SingleChildScrollView(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             //crossAxisAlignment: CrossAxisAlignment.center,
             //mainAxisAlignment: MainAxisAlignment.center,
             children: [

@@ -126,6 +126,10 @@ class AuthService {
     }
   }
 
+  String getCurrentUserId() {
+    return FirebaseAuth.instance.currentUser!.uid.toString();
+  }
+
   Future<bool> addUserExpense(BuildContext context, UserExpense expense) async {
     final currentUser = FirebaseAuth.instance.currentUser!;
     try {

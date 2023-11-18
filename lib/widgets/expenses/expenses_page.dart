@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:popbill/widgets/expenses/add_expense.dart';
 import 'package:popbill/widgets/expenses/all_transactions.dart';
+import 'package:popbill/widgets/home/app_drawer.dart';
 
 class ExpensesPage extends StatefulWidget {
   const ExpensesPage({super.key});
@@ -14,9 +16,20 @@ class ExpensesPage extends StatefulWidget {
 }
 
 class _ExpensesPageState extends State<ExpensesPage> {
+  final currentMonth = DateFormat('MMMM').format(DateTime.now());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Expenses for $currentMonth'),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.filter_alt_outlined),
+          )
+        ],
+      ),
+      drawer: AppDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showModalBottomSheet<void>(
@@ -45,7 +58,10 @@ class _ExpensesPageState extends State<ExpensesPage> {
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .collection('expenses')
             .snapshots(),
-        builder: (context, snapshot) => const AllTransactions(),
+        builder: (context, snapshot) => AllTransactions(
+          month: DateTime.now().month,
+          year: DateTime.now().year,
+        ),
       ),
     );
   }

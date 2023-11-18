@@ -10,7 +10,13 @@ import 'package:popbill/services/auth_services.dart';
 //Use riverpod to store the total amount spent in a month
 
 class AllTransactions extends StatefulWidget {
-  const AllTransactions({super.key});
+  const AllTransactions({Key? key, required int year, required int month})
+      : filterYear = year,
+        filterMonth = month,
+        super(key: key);
+
+  final int filterYear;
+  final int filterMonth;
 
   @override
   State<AllTransactions> createState() {
@@ -20,19 +26,29 @@ class AllTransactions extends StatefulWidget {
 
 class _AllTransactionsState extends State<AllTransactions> {
   late Future<List<UserExpense>> expenses;
+  double totalPeriodExpense = 0;
 
   Future<List<UserExpense>> _getData() async {
-    return await AuthService().getExpenses(
-      filterYear: DateTime.now().year,
-      filterMonth: DateTime.now().month,
-    );
+    try {
+      List<UserExpense> expenses = await AuthService().getExpenses(
+        filterYear: widget.filterYear,
+        filterMonth: widget.filterMonth,
+      );
+
+      totalPeriodExpense =
+          expenses.fold(0, (double previousValue, UserExpense expense) {
+        return previousValue + expense.amount;
+      });
+
+      return expenses;
+    } catch (e) {
+      return [];
+    }
   }
 
   Future<void> _pullRefresh() async {
-    List<UserExpense> freshExpenses = await AuthService().getExpenses(
-      filterYear: DateTime.now().year,
-      filterMonth: DateTime.now().month,
-    );
+    List<UserExpense> freshExpenses = await _getData();
+
     setState(() {
       expenses = Future.value(freshExpenses);
     });
@@ -57,8 +73,133 @@ class _AllTransactionsState extends State<AllTransactions> {
       return selectedDateFormatter.format(expenseDate).toString();
     }
 
-    double monthlyExpenses = 0;
+    return Column(
+      children: [
+        Card(
+          elevation: 5,
+          margin: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Container(
+            padding: EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Total Expenses',
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.04,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+                Text(
+                  'Rs. ${totalPeriodExpense.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.width * 0.04,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        FutureBuilder<List<UserExpense>>(
+          future: _getData(),
+          builder: (ctx1, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return Text('Error: ${snapshot.error}');
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Text('No expenses found.');
+            } else {
+              return Expanded(
+                child: Scaffold(
+                  body: RefreshIndicator(
+                    onRefresh: _pullRefresh,
+                    child: ListView.builder(
+                      itemCount: snapshot.data!.length,
+                      itemBuilder: (ctx2, index) {
+                        UserExpense expense = snapshot.data![index];
+                        return Dismissible(
+                          key: Key(expense.title),
+                          background: Container(
+                            color: Colors.red,
+                            child: const Align(
+                              alignment: Alignment.centerRight,
+                              child: Icon(
+                                Icons.delete,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                          onDismissed: (direction) {
+                            AuthService().removeUserExpense(context, expense);
+                          },
+                          child: Padding(
+                            padding: EdgeInsets.all(deviceSize * 2),
+                            child: ListTile(
+                              subtitle: Column(children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      expense.title,
+                                      style: TextStyle(
+                                        fontSize: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge!
+                                            .fontSize,
+                                        fontWeight: FontWeight.bold,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Rs. ${expense.amount.toStringAsFixed(2)}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      'Date: ${selectedDate(expense.date)}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      'Time: ${selectedTime(expense.time)}',
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                )
+                              ]),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            }
+          },
+        ),
+      ],
+    );
 
+/*
     return Center(
       child: FutureBuilder<List<UserExpense>>(
         future: expenses,
@@ -77,8 +218,8 @@ class _AllTransactionsState extends State<AllTransactions> {
                   itemCount: snapshot.data!.length,
                   itemBuilder: (ctx2, index) {
                     UserExpense expense = snapshot.data![index];
-                    monthlyExpenses += expense.amount;
-                    print(monthlyExpenses);
+                    //totalPeriodExpense += expense.amount;
+                    //print(totalPeriodExpense);
                     return Dismissible(
                       key: Key(expense.title),
                       background: Container(
@@ -145,6 +286,6 @@ class _AllTransactionsState extends State<AllTransactions> {
           }
         },
       ),
-    );
+    );*/
   }
 }

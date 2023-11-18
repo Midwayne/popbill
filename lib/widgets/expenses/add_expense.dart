@@ -115,6 +115,7 @@ class _AddExpenseState extends State<AddExpense> {
               children: [
                 Expanded(
                   child: TextFormField(
+                    maxLength: 25,
                     keyboardType: TextInputType.text,
                     decoration: const InputDecoration(
                         labelText: 'Title*', hintText: 'Food'),
