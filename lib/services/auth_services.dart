@@ -6,6 +6,24 @@ import 'package:popbill/models/user_expense.dart';
 
 class AuthService {
   // final uuid = const Uuid();
+  void addUserDetailsToFirestore(BuildContext context, String email) async {
+    try {
+      CollectionReference expensesReference =
+          FirebaseFirestore.instance.collection('users');
+
+      await expensesReference.doc(FirebaseAuth.instance.currentUser!.uid).set({
+        'email': email,
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('An unexpected error occurred. Try again.'),
+        ),
+      );
+    }
+  }
+
   Future<UserCredential?> signUpWithEmail(BuildContext context,
       TextEditingController email, TextEditingController password) async {
     try {
@@ -14,6 +32,7 @@ class AuthService {
           email: email.text, password: password.text);
 
       if (FirebaseAuth.instance.currentUser != null) {
+        addUserDetailsToFirestore(context, email.text);
         Navigator.of(context).pop();
         Navigator.of(context).pop();
       }
@@ -38,6 +57,8 @@ class AuthService {
           email: email.text, password: password.text);
 
       if (FirebaseAuth.instance.currentUser != null) {
+        //Remove the bottom line before production
+        addUserDetailsToFirestore(context, email.text);
         Navigator.of(context).pop();
       }
 
@@ -85,6 +106,10 @@ class AuthService {
       );
 
       await FirebaseAuth.instance.signInWithCredential(credential);
+
+      //Add the below code only once to firestore.
+      String email = FirebaseAuth.instance.currentUser!.email.toString();
+      addUserDetailsToFirestore(context, email);
 
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -237,6 +262,22 @@ class AuthService {
               'An unexpected error occurred while deleting expense.\nPlease try again'),
         ),
       );
+    }
+  }
+
+  Future<bool> verifyIfUserExists({required String userId}) async {
+    try {
+      // Reference to the "users" collection
+      CollectionReference usersCollection =
+          FirebaseFirestore.instance.collection('users');
+
+      // Get the document snapshot
+      DocumentSnapshot documentSnapshot =
+          await usersCollection.doc(userId).get();
+
+      return documentSnapshot.exists;
+    } catch (e) {
+      return false;
     }
   }
 }

@@ -41,6 +41,14 @@ class _AddExpenseState extends State<AddExpense> {
     TimeOfDay? picked = await showTimePicker(
       context: context,
       initialTime: selectedTime,
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: ThemeData.from(
+            colorScheme: Theme.of(context).colorScheme,
+          ), // Adjust as needed
+          child: child!,
+        );
+      },
     );
 
     if (picked != null && picked != selectedTime) {

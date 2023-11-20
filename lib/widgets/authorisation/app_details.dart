@@ -6,7 +6,7 @@ class AppDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).devicePixelRatio;
+    final deviceSize = MediaQuery.of(context).size.height * 0.0029;
     return Row(
       children: [
         SvgPicture.asset(
