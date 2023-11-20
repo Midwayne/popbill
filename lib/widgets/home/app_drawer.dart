@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:popbill/services/auth_services.dart';
+import 'package:popbill/widgets/home/user_qr.dart';
 import 'package:share_plus/share_plus.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -53,10 +54,20 @@ class AppDrawer extends StatelessWidget {
               ),
               IconButton(
                 onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: ((context) {
+                      return UserQR(currentUserId);
+                    })),
+                  );
+                },
+                icon: const Icon(Icons.qr_code_2),
+              ),
+              IconButton(
+                onPressed: () {
                   Share.share(currentUserId);
                 },
                 icon: const Icon(Icons.share),
-              )
+              ),
             ],
           ),
 

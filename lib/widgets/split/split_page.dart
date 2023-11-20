@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:popbill/widgets/home/app_drawer.dart';
 
 class SplitPage extends StatefulWidget {
   const SplitPage({super.key});
@@ -14,6 +15,17 @@ class _SplitPageState extends State<SplitPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Text('Split-page');
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Groups'),
+        actions: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(Icons.group_add),
+          )
+        ],
+      ),
+      drawer: AppDrawer(),
+    );
   }
 }
