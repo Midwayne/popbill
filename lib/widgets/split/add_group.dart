@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:popbill/services/auth_services.dart';
 
@@ -16,8 +15,8 @@ class _AddGroupState extends State<AddGroup> {
   String groupName = '';
   TextEditingController userIdController = TextEditingController();
   String currentUserId = '';
-  //ADD CURRENT USERID TO LIST BEFORE SUBMITTING THE GROUP
   List<String> users = [];
+  List<Map<String, String>> usernames = [];
 
   @override
   void initState() {
@@ -25,13 +24,44 @@ class _AddGroupState extends State<AddGroup> {
     super.initState();
     currentUserId = widget.currentUserId;
     users.add(currentUserId);
+    usernames.add(
+      {
+        'id': currentUserId,
+        'nickname': '',
+      },
+    );
   }
 
-  void verifyIfUserExists({required String userId}) async {
+  void verifyIfUserExistsAndAdd({required String userId}) async {
+    if (userId.isEmpty) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enter an ID'),
+        ),
+      );
+      return;
+    }
+    if (users.contains(userId)) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User already added!'),
+        ),
+      );
+      return;
+    }
     bool userStatus = await AuthService().verifyIfUserExists(userId: userId);
+
     if (userStatus) {
       setState(() {
         users.add(userId);
+        usernames.add(
+          {
+            'id': userId,
+            'nickname': '',
+          },
+        );
       });
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -41,6 +71,13 @@ class _AddGroupState extends State<AddGroup> {
         ),
       );
     }
+  }
+
+  void removeUserFromGroup(String userId) {
+    setState(() {
+      users.remove(userId);
+      usernames.removeWhere((map) => map['id'] == userId);
+    });
   }
 
   @override
@@ -74,7 +111,7 @@ class _AddGroupState extends State<AddGroup> {
                   return null;
                 },
               ),
-              SizedBox(height: deviceSize * 10),
+              SizedBox(height: deviceSize * 4),
               Row(
                 children: [
                   Expanded(
@@ -89,12 +126,55 @@ class _AddGroupState extends State<AddGroup> {
                     onPressed: () {
                       // Implement the logic to add user ID to the list
                       print(userIdController.text);
-                      verifyIfUserExists(userId: userIdController.text);
+                      verifyIfUserExistsAndAdd(userId: userIdController.text);
                     },
                   ),
                 ],
               ),
               SizedBox(height: deviceSize * 10),
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Column(
+                    children: [
+                      const Text('Users added: '),
+                      for (int i = 0; i < users.length; i++)
+                        if (users[i] == currentUserId)
+                          ListTile(
+                            title: TextField(
+                              decoration:
+                                  InputDecoration(hintText: 'Enter a nickname'),
+                              maxLength: 10,
+                              controller: TextEditingController(),
+                            ),
+                            subtitle: Text('You'),
+                            trailing: ElevatedButton(
+                              onPressed: () {
+                                //Add nickname to map
+                              },
+                              child: const Text('Confirm'),
+                            ),
+                          )
+                        else
+                          ListTile(
+                            title: TextField(
+                              decoration:
+                                  InputDecoration(hintText: 'Enter a nickname'),
+                              maxLength: 10,
+                              controller: TextEditingController(),
+                            ),
+                            subtitle: Text(users[i]),
+                            trailing: ElevatedButton(
+                              onPressed: () {
+                                //Add nickname to map
+                              },
+                              child: const Text('Confirm'),
+                            ),
+                          )
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ),
