@@ -20,7 +20,6 @@ class _AddGroupState extends State<AddGroup> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     currentUserId = widget.currentUserId;
     users.add(currentUserId);
