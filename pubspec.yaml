@@ -45,6 +45,7 @@ dependencies:
   share_plus: ^7.2.1
   qr_flutter: ^4.1.0
   time_picker_spinner: ^0.0.1
+  simple_barcode_scanner: ^0.0.8
 
 dev_dependencies:
   flutter_test:

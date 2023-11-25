@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:popbill/services/auth_services.dart';
+import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 class AddGroup extends StatefulWidget {
   AddGroup({super.key, required this.currentUserId});
@@ -126,6 +127,26 @@ class _AddGroupState extends State<AddGroup> {
                       // Implement the logic to add user ID to the list
                       print(userIdController.text);
                       verifyIfUserExistsAndAdd(userId: userIdController.text);
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.qr_code_2),
+                    onPressed: () async {
+                      var res = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const SimpleBarcodeScannerPage(),
+                          ));
+                      setState(() {
+                        if (res == '-1') {
+                          userIdController.text == '';
+                          return;
+                        }
+                        if (res is String) {
+                          userIdController.text = res;
+                        }
+                      });
                     },
                   ),
                 ],
