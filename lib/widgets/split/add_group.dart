@@ -114,6 +114,8 @@ class _AddGroupState extends State<AddGroup> {
               SizedBox(height: deviceSize * 4),
               Row(
                 children: [
+                  //Here add the nickname as soon as the userID is entered.
+                  //Better strategy than having an array of TextFieldControllers()
                   Expanded(
                     child: TextFormField(
                       controller: userIdController,
