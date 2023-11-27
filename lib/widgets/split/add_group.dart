@@ -114,6 +114,10 @@ class _AddGroupState extends State<AddGroup> {
               SizedBox(height: deviceSize * 4),
               Row(
                 children: [
+                  //Use an if condition to implement this:
+                  //First add group admin nickname
+                  //Allow the user to add group members only after he enters his nickname
+
                   //Here add the nickname as soon as the userID is entered.
                   //Better strategy than having an array of TextFieldControllers()
                   Expanded(
