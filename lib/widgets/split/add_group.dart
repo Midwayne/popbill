@@ -120,6 +120,10 @@ class _AddGroupState extends State<AddGroup> {
 
                   //Here add the nickname as soon as the userID is entered.
                   //Better strategy than having an array of TextFieldControllers()
+
+                  // OR
+                  // Let us change the whole architecture to a username based one
+                  // Like instagram
                   Expanded(
                     child: TextFormField(
                       controller: userIdController,
