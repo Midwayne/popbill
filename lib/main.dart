@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
           seedColor: const Color.fromARGB(255, 241, 235, 144),
         ),
         useMaterial3: true,
-        textTheme: GoogleFonts.latoTextTheme(),
+        textTheme: GoogleFonts.nunitoTextTheme(),
       ),
       home: StreamBuilder(
         stream: FirebaseAuth.instance.authStateChanges(),
