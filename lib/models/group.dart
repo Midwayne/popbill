@@ -4,10 +4,10 @@ class Group {
   Group({
     String? groupId,
     required this.groupName,
-    required this.nickname,
+    required this.users,
   }) : groupId = groupId ?? const Uuid().v4();
 
   final String groupId;
   final String groupName;
-  List<Map<String, String>> nickname; //{userId: nickname}
+  List<Map<String, String>> users; //[{'userId' = '', 'nickname'= ''}]
 }

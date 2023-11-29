@@ -29,7 +29,9 @@ class AuthService {
     try {
       final firebase = FirebaseAuth.instance;
       final userCredentials = await firebase.createUserWithEmailAndPassword(
-          email: email.text, password: password.text);
+        email: email.text,
+        password: password.text,
+      );
 
       if (FirebaseAuth.instance.currentUser != null) {
         addUserDetailsToFirestore(context, email.text);

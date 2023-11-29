@@ -31,52 +31,50 @@ class _UserProfilePageState extends State<UserProfilePage> {
         child: Center(
           child: Column(
             children: [
-              Card(
-                elevation: 5,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 14.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        'My user ID: ',
-                        style: TextStyle(
-                          fontSize:
-                              Theme.of(context).textTheme.titleMedium!.fontSize,
-                          fontWeight: FontWeight.bold,
-                        ),
+              Padding(
+                padding: const EdgeInsets.only(top: 30.0),
+                child: Column(
+                  children: [
+                    Text(
+                      'My user ID: ',
+                      style: TextStyle(
+                        fontSize:
+                            Theme.of(context).textTheme.titleMedium!.fontSize,
+                        fontWeight: FontWeight.bold,
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ListTile(
-                              title: Text(
-                                currentUserId,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ListTile(
+                            title: Text(
+                              currentUserId,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(builder: ((context) {
-                                  return UserQR(currentUserId);
-                                })),
-                              );
-                            },
-                            icon: const Icon(Icons.qr_code_2),
-                          ),
-                          IconButton(
-                            onPressed: () {
-                              Share.share(currentUserId);
-                            },
-                            icon: const Icon(Icons.share),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: ((context) {
+                                return UserQR(currentUserId);
+                              })),
+                            );
+                          },
+                          icon: const Icon(Icons.qr_code_2),
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            Share.share(currentUserId);
+                          },
+                          icon: const Icon(Icons.share),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 20),
               TextButton(
                 child: const Text('Delete my account'),
                 onPressed: () {

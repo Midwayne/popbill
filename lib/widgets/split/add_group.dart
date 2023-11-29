@@ -3,8 +3,8 @@ import 'package:popbill/services/auth_services.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 class AddGroup extends StatefulWidget {
-  AddGroup({super.key, required this.currentUserId});
-  String currentUserId;
+  const AddGroup({super.key, required this.currentUserId});
+  final String currentUserId;
   @override
   State<AddGroup> createState() {
     return _AddGroupState();
@@ -13,26 +13,26 @@ class AddGroup extends StatefulWidget {
 
 class _AddGroupState extends State<AddGroup> {
   final _form = GlobalKey<FormState>();
+
   String groupName = '';
+
   TextEditingController userIdController = TextEditingController();
+  TextEditingController nicknameController = TextEditingController();
+
   String currentUserId = '';
-  List<String> users = [];
-  List<Map<String, String>> usernames = [];
+
+  List<String> userIDs = [];
+  List<String> nicknames = [];
+  List<Map<String, String>> users = [];
 
   @override
   void initState() {
     super.initState();
     currentUserId = widget.currentUserId;
-    users.add(currentUserId);
-    usernames.add(
-      {
-        'id': currentUserId,
-        'nickname': '',
-      },
-    );
   }
 
-  void verifyIfUserExistsAndAdd({required String userId}) async {
+  void verifyIfUserExistsAndAdd(
+      {required String userId, required String nickname}) async {
     if (userId.isEmpty) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -42,7 +42,16 @@ class _AddGroupState extends State<AddGroup> {
       );
       return;
     }
-    if (users.contains(userId)) {
+    if (nickname.isEmpty) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Enter a nickname'),
+        ),
+      );
+      return;
+    }
+    if (userIDs.contains(userId)) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -51,17 +60,29 @@ class _AddGroupState extends State<AddGroup> {
       );
       return;
     }
+    if (nicknames.contains(nickname)) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nickname already exists!'),
+        ),
+      );
+      return;
+    }
     bool userStatus = await AuthService().verifyIfUserExists(userId: userId);
 
     if (userStatus) {
       setState(() {
-        users.add(userId);
-        usernames.add(
+        userIDs.add(userId);
+        nicknames.add(nickname);
+        users.add(
           {
             'id': userId,
-            'nickname': '',
+            'nickname': nickname,
           },
         );
+
+        print(users);
       });
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -73,10 +94,12 @@ class _AddGroupState extends State<AddGroup> {
     }
   }
 
-  void removeUserFromGroup(String userId) {
+  //Remove isn't built yet
+  void removeUserFromGroup(String userId, String nickname) {
     setState(() {
-      users.remove(userId);
-      usernames.removeWhere((map) => map['id'] == userId);
+      userIDs.remove(userId);
+      nicknames.remove(nickname);
+      users.removeWhere((map) => map['id'] == userId);
     });
   }
 
@@ -90,7 +113,7 @@ class _AddGroupState extends State<AddGroup> {
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(
           horizontal: deviceSize * 10,
-          vertical: deviceSize * 10, // Adjust the vertical padding as needed
+          vertical: deviceSize * 10,
         ),
         child: Form(
           key: _form,
@@ -112,96 +135,134 @@ class _AddGroupState extends State<AddGroup> {
                 },
               ),
               SizedBox(height: deviceSize * 4),
-              Row(
-                children: [
-                  //Use an if condition to implement this:
-                  //First add group admin nickname
-                  //Allow the user to add group members only after he enters his nickname
-
-                  //Here add the nickname as soon as the userID is entered.
-                  //Better strategy than having an array of TextFieldControllers()
-
-                  // OR
-                  // Let us change the whole architecture to a username based one
-                  // Like instagram
-                  Expanded(
-                    child: TextFormField(
-                      controller: userIdController,
-                      keyboardType: TextInputType.text,
-                      decoration: const InputDecoration(labelText: 'User ID'),
+              (users.isNotEmpty)
+                  ? Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(12.0),
+                        child: Column(
+                          children: [
+                            const Text('Add  a member'),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: userIdController,
+                                    keyboardType: TextInputType.text,
+                                    decoration: const InputDecoration(
+                                        labelText: 'User ID'),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.qr_code_2),
+                                  onPressed: () async {
+                                    var res = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              const SimpleBarcodeScannerPage(),
+                                        ));
+                                    setState(() {
+                                      if (res == '-1') {
+                                        userIdController.text == '';
+                                        return;
+                                      }
+                                      if (res is String) {
+                                        userIdController.text = res;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    maxLength: 10,
+                                    controller: nicknameController,
+                                    keyboardType: TextInputType.text,
+                                    decoration: const InputDecoration(
+                                      labelText: 'Nickname',
+                                      hintText: 'John',
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.add),
+                                  onPressed: () {
+                                    verifyIfUserExistsAndAdd(
+                                      userId: userIdController.text,
+                                      nickname: nicknameController.text,
+                                    );
+                                    userIdController.text = '';
+                                    nicknameController.text = '';
+                                  },
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            maxLength: 10,
+                            controller: nicknameController,
+                            keyboardType: TextInputType.text,
+                            decoration: const InputDecoration(
+                              labelText: 'Your nickname',
+                              hintText: 'John',
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.add),
+                          onPressed: () {
+                            verifyIfUserExistsAndAdd(
+                              userId: currentUserId,
+                              nickname: nicknameController.text,
+                            );
+                            userIdController.text = '';
+                            nicknameController.text = '';
+                          },
+                        ),
+                      ],
                     ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.add),
-                    onPressed: () {
-                      // Implement the logic to add user ID to the list
-                      print(userIdController.text);
-                      verifyIfUserExistsAndAdd(userId: userIdController.text);
-                    },
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.qr_code_2),
-                    onPressed: () async {
-                      var res = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const SimpleBarcodeScannerPage(),
-                          ));
-                      setState(() {
-                        if (res == '-1') {
-                          userIdController.text == '';
-                          return;
+              SizedBox(height: deviceSize * 10),
+              Text('Users added: ${users.length}'),
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Row(
+                  children: users.map((user) {
+                    final userId = user['userId'];
+                    final nickname = user['nickname'];
+
+                    return GestureDetector(
+                      onLongPress: () {
+                        if (userId != 'currentUserId') {
+                          //removeUserFromGroup
                         }
-                        if (res is String) {
-                          userIdController.text = res;
-                        }
-                      });
-                    },
-                  ),
-                ],
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: Text('$nickname'),
+                      ),
+                    );
+                  }).toList(),
+                ),
               ),
               SizedBox(height: deviceSize * 10),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 10),
-                  child: Column(
-                    children: [
-                      const Text('Users added: '),
-                      for (int i = 0; i < users.length; i++)
-                        if (users[i] == currentUserId)
-                          ListTile(
-                            title: TextField(
-                              decoration:
-                                  InputDecoration(hintText: 'Enter a nickname'),
-                              maxLength: 10,
-                              controller: TextEditingController(),
-                            ),
-                            subtitle: Text('You'),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                //Add nickname to map
-                              },
-                              child: const Text('Confirm'),
-                            ),
-                          )
-                        else
-                          ListTile(
-                            title: TextField(
-                              decoration:
-                                  InputDecoration(hintText: 'Enter a nickname'),
-                              maxLength: 10,
-                              controller: TextEditingController(),
-                            ),
-                            subtitle: Text(users[i]),
-                            trailing: ElevatedButton(
-                              onPressed: () {
-                                //Add nickname to map
-                              },
-                              child: const Text('Confirm'),
-                            ),
-                          )
-                    ],
+              ElevatedButton(
+                style: const ButtonStyle(
+                  elevation: MaterialStatePropertyAll(6),
+                ),
+                onPressed: () {},
+                child: const Text(
+                  'Create group',
+                  style: TextStyle(
+                    fontSize: 16,
                   ),
                 ),
               ),
