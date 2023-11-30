@@ -5,10 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:popbill/models/user_expense.dart';
 import 'package:popbill/services/auth_services.dart';
 
-// Currently this shows only the current month's expenses.
-// Add a filter in the appbar to choose any month's expenses.
-//Use riverpod to store the total amount spent in a month
-
 class AllTransactions extends StatefulWidget {
   const AllTransactions({Key? key, required int year, required int month})
       : filterYear = year,
@@ -86,6 +82,30 @@ class _AllTransactionsState extends State<AllTransactions> {
       return selectedDateFormatter.format(expenseDate).toString();
     }
 
+    String getDaySuffix(int day) {
+      if (day >= 11 && day <= 13) {
+        return 'th';
+      }
+      switch (day % 10) {
+        case 1:
+          return 'st';
+        case 2:
+          return 'nd';
+        case 3:
+          return 'rd';
+        default:
+          return 'th';
+      }
+    }
+
+    String selectedDateHeader(DateTime expenseDate) {
+      final day = DateFormat('d').format(expenseDate);
+      final month = DateFormat('MMMM').format(expenseDate);
+      final suffix = getDaySuffix(int.parse(day));
+
+      return '$day$suffix $month';
+    }
+
     return Column(
       children: [
         Card(
@@ -106,16 +126,16 @@ class _AllTransactionsState extends State<AllTransactions> {
                 Text(
                   'Total Expenses',
                   style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.04,
-                    fontWeight: FontWeight.bold,
+                    fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
+                    fontWeight: FontWeight.w500,
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
                 Text(
                   'Rs. ${totalPeriodExpense.toStringAsFixed(2)}',
                   style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.width * 0.04,
-                    fontWeight: FontWeight.bold,
+                    fontSize: Theme.of(context).textTheme.titleLarge!.fontSize,
+                    fontWeight: FontWeight.w500,
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
                 ),
@@ -133,104 +153,156 @@ class _AllTransactionsState extends State<AllTransactions> {
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
               return const Text('No expenses found.');
             } else {
+              // Group transactions by date
+              Map<DateTime, List<UserExpense>> groupedTransactions = {};
+
+              for (UserExpense expense in snapshot.data!) {
+                DateTime date = expense.date;
+
+                if (!groupedTransactions.containsKey(date)) {
+                  groupedTransactions[date] = [];
+                }
+
+                groupedTransactions[date]!.add(expense);
+              }
+
               return Expanded(
                 child: Scaffold(
                   body: RefreshIndicator(
                     onRefresh: _pullRefresh,
-                    child: ListView.builder(
-                      itemCount: snapshot.data!.length,
-                      itemBuilder: (ctx2, index) {
-                        UserExpense expense = snapshot.data![index];
-                        return Dismissible(
-                          key: Key(expense.title),
-                          background: Container(
-                            color: Colors.red,
-                            child: const Align(
-                              alignment: Alignment.centerRight,
-                              child: Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          onDismissed: (direction) async {
-                            Future<int> status = AuthService()
-                                .removeUserExpense(context, expense);
+                    child: ListView(
+                      children: groupedTransactions.entries.map(
+                        (entry) {
+                          DateTime date = entry.key;
+                          List<UserExpense> transactions = entry.value;
 
-                            int statusValue = await status;
-
-                            if (statusValue == 1) {
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: const Text('Expense deleted.'),
-                                  action: SnackBarAction(
-                                    label: 'Undo',
-                                    onPressed: () {
-                                      AuthService()
-                                          .addUserExpense(context, expense);
-                                      _pullRefresh();
-                                    },
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  padding: const EdgeInsets.all(10.0),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      selectedDateHeader(date),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium!
+                                          .copyWith(
+                                            fontWeight: FontWeight.w500,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimary,
+                                          ),
+                                    ),
                                   ),
                                 ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).clearSnackBars();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text(
-                                      'An unexpected error occurred while deleting expense.\nPlease try again'),
-                                ),
-                              );
-                            }
-                            _pullRefresh();
-                          },
-                          child: Padding(
-                            padding: EdgeInsets.all(deviceSize * 2),
-                            child: ListTile(
-                              subtitle: Column(children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      expense.title,
-                                      style: TextStyle(
-                                        fontSize: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge!
-                                            .fontSize,
-                                        fontWeight: FontWeight.bold,
-                                        overflow: TextOverflow.ellipsis,
+                              ),
+                              ...transactions.map(
+                                (expense) => Dismissible(
+                                  key: Key(expense.title),
+                                  background: Container(
+                                    color: Theme.of(context).colorScheme.error,
+                                    child: const Align(
+                                      alignment: Alignment.centerRight,
+                                      child: Icon(
+                                        Icons.delete,
+                                        color: Colors.white,
                                       ),
                                     ),
-                                    Text(
-                                      'Rs. ${expense.amount.toStringAsFixed(2)}',
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                  ),
+                                  onDismissed: (direction) async {
+                                    Future<int> status = AuthService()
+                                        .removeUserExpense(context, expense);
+
+                                    int statusValue = await status;
+
+                                    if (statusValue == 1) {
+                                      ScaffoldMessenger.of(context)
+                                          .clearSnackBars();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content:
+                                              const Text('Expense deleted.'),
+                                          action: SnackBarAction(
+                                            label: 'Undo',
+                                            onPressed: () {
+                                              AuthService().addUserExpense(
+                                                  context, expense);
+                                              _pullRefresh();
+                                            },
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .clearSnackBars();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                              'An unexpected error occurred while deleting expense.\nPlease try again'),
+                                        ),
+                                      );
+                                    }
+                                    _pullRefresh();
+                                  },
+                                  child: ListTile(
+                                    subtitle: Column(children: [
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            expense.title,
+                                            style: TextStyle(
+                                              fontSize: Theme.of(context)
+                                                  .textTheme
+                                                  .titleLarge!
+                                                  .fontSize,
+                                              fontWeight: FontWeight.bold,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Text(
+                                            'Rs. ${expense.amount.toStringAsFixed(2)}',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Date: ${selectedDate(expense.date)}',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Text(
+                                            'Time: ${selectedTime(expense.time)}',
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      )
+                                    ]),
+                                  ),
                                 ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Date: ${selectedDate(expense.date)}',
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      'Time: ${selectedTime(expense.time)}',
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                )
-                              ]),
-                            ),
-                          ),
-                        );
-                      },
+                              ),
+                            ],
+                          );
+                        },
+                      ).toList(),
                     ),
                   ),
                 ),

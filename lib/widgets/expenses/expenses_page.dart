@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:popbill/widgets/expenses/add_expense.dart';
 import 'package:popbill/widgets/expenses/all_transactions.dart';
+import 'package:popbill/widgets/expenses/filter_page.dart';
 import 'package:popbill/widgets/home/app_drawer.dart';
 
 class ExpensesPage extends StatefulWidget {
@@ -29,7 +30,13 @@ class _ExpensesPageState extends State<ExpensesPage> {
         title: Text('Expenses for $currentMonth'),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const FilterPage(),
+                ),
+              );
+            },
             icon: const Icon(Icons.filter_alt_outlined),
           )
         ],
