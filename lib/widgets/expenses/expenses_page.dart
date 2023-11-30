@@ -17,6 +17,11 @@ class ExpensesPage extends StatefulWidget {
 
 class _ExpensesPageState extends State<ExpensesPage> {
   final currentMonth = DateFormat('MMMM').format(DateTime.now());
+
+  void reloadAllTransactions() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,8 +44,8 @@ class _ExpensesPageState extends State<ExpensesPage> {
                 return DraggableScrollableSheet(
                   initialChildSize: 1,
                   builder: ((ctx, scrollController) {
-                    return const Center(
-                      child: AddExpense(),
+                    return Center(
+                      child: AddExpense(reloadCallback: reloadAllTransactions),
                     );
                   }),
                 );

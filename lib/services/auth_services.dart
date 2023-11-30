@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:popbill/models/group.dart';
 import 'package:popbill/models/user_expense.dart';
 
 class AuthService {
@@ -232,7 +233,8 @@ class AuthService {
     }
   }
 
-  void removeUserExpense(BuildContext context, UserExpense expense) async {
+  Future<int> removeUserExpense(
+      BuildContext context, UserExpense expense) async {
     final currentUser = FirebaseAuth.instance.currentUser!;
     try {
       await FirebaseFirestore.instance
@@ -244,26 +246,9 @@ class AuthService {
           .doc(expense.id)
           .delete();
 
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Expense deleted.'),
-          action: SnackBarAction(
-            label: 'Undo',
-            onPressed: () {
-              addUserExpense(context, expense);
-            },
-          ),
-        ),
-      );
+      return 1;
     } catch (error) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'An unexpected error occurred while deleting expense.\nPlease try again'),
-        ),
-      );
+      return 0;
     }
   }
 
@@ -280,6 +265,50 @@ class AuthService {
       return documentSnapshot.exists;
     } catch (e) {
       return false;
+    }
+  }
+
+  void createGroup(BuildContext context, Group group) async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    try {
+      CollectionReference groupsCollection =
+          FirebaseFirestore.instance.collection('groups');
+
+      await groupsCollection.doc(group.groupId).set({
+        'id': group.groupId,
+        'name': group.groupName,
+        'users': group.users,
+      });
+
+      group.users.forEach((user) async {
+        CollectionReference usersCollection = FirebaseFirestore.instance
+            .collection('users')
+            .doc(user['id'])
+            .collection('groups');
+
+        await usersCollection.doc(group.groupId).set({
+          'id': group.groupId,
+          'name': group.groupName,
+          'users': group.users,
+        });
+      });
+
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Group created.'),
+        ),
+      );
+    } catch (e) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'An unexpected error occurred while creating expense.\nPlease try again'),
+        ),
+      );
     }
   }
 }

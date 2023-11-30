@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:popbill/models/group.dart';
 import 'package:popbill/services/auth_services.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
@@ -29,6 +30,13 @@ class _AddGroupState extends State<AddGroup> {
   void initState() {
     super.initState();
     currentUserId = widget.currentUserId;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    userIdController.dispose();
+    nicknameController.dispose();
   }
 
   void verifyIfUserExistsAndAdd(
@@ -103,6 +111,36 @@ class _AddGroupState extends State<AddGroup> {
     });
   }
 
+  void createGroup() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final isValid = _form.currentState!.validate();
+
+    if (!isValid) {
+      return;
+    }
+
+    if (users.length < 2) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Add at least two members'),
+        ),
+      );
+      return;
+    }
+
+    _form.currentState!.save();
+
+    //Auth service invoke
+    Group finalUsers = Group(groupName: groupName, users: users);
+    print(
+        '${finalUsers.groupName}, ${finalUsers.users}, ${finalUsers.groupId}');
+    AuthService().createGroup(context, finalUsers);
+
+    //Add this group in two places: in the groups collections such as users
+    //And in the user account for easy reload
+  }
+
   @override
   Widget build(BuildContext context) {
     final deviceSize = MediaQuery.of(context).devicePixelRatio;
@@ -141,7 +179,7 @@ class _AddGroupState extends State<AddGroup> {
                         padding: const EdgeInsets.all(12.0),
                         child: Column(
                           children: [
-                            const Text('Add  a member'),
+                            const Text('Add a member'),
                             Row(
                               children: [
                                 Expanded(
@@ -245,9 +283,19 @@ class _AddGroupState extends State<AddGroup> {
                           //removeUserFromGroup
                         }
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 8.0),
-                        child: Text('$nickname'),
+                      child: Container(
+                        padding: const EdgeInsets.all(8.0),
+                        margin: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(20.0),
+                        ),
+                        child: Text(
+                          '$nickname',
+                          style: const TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
                     );
                   }).toList(),
@@ -258,7 +306,7 @@ class _AddGroupState extends State<AddGroup> {
                 style: const ButtonStyle(
                   elevation: MaterialStatePropertyAll(6),
                 ),
-                onPressed: () {},
+                onPressed: createGroup,
                 child: const Text(
                   'Create group',
                   style: TextStyle(

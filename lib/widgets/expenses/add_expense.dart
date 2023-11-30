@@ -5,7 +5,9 @@ import 'package:intl/intl.dart';
 import 'package:popbill/services/auth_services.dart';
 
 class AddExpense extends StatefulWidget {
-  const AddExpense({super.key});
+  const AddExpense({Key? key, required this.reloadCallback}) : super(key: key);
+
+  final VoidCallback reloadCallback;
 
   @override
   State<AddExpense> createState() => _AddExpenseState();
@@ -79,10 +81,14 @@ class _AddExpenseState extends State<AddExpense> {
         time: selectedTime,
       );
 
-      final Future<bool> returnCode =
+      final Future<bool> returnCodeFuture =
           AuthService().addUserExpense(context, expense);
 
-      if (returnCode != true) {
+      bool returnCode = await returnCodeFuture;
+
+      widget.reloadCallback();
+
+      if (returnCode == true) {
         Navigator.of(context).pop();
 
         ScaffoldMessenger.of(context).clearSnackBars();
