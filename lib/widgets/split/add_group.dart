@@ -3,9 +3,16 @@ import 'package:popbill/models/group.dart';
 import 'package:popbill/services/auth_services.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
+//To implement: The page doesn't reload automatically even after adding
+
 class AddGroup extends StatefulWidget {
-  const AddGroup({super.key, required this.currentUserId});
+  const AddGroup({
+    super.key,
+    required this.currentUserId,
+    required this.reloadPage,
+  });
   final String currentUserId;
+  final Function() reloadPage;
   @override
   State<AddGroup> createState() {
     return _AddGroupState();
@@ -126,6 +133,7 @@ class _AddGroupState extends State<AddGroup> {
           content: Text('Add at least two members'),
         ),
       );
+
       return;
     }
 
@@ -136,6 +144,8 @@ class _AddGroupState extends State<AddGroup> {
     print(
         '${finalUsers.groupName}, ${finalUsers.users}, ${finalUsers.groupId}');
     AuthService().createGroup(context, finalUsers);
+
+    widget.reloadPage;
 
     //Add this group in two places: in the groups collections such as users
     //And in the user account for easy reload

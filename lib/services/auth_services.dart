@@ -311,4 +311,57 @@ class AuthService {
       );
     }
   }
+
+  Future<List<Group>> getGroups() async {
+    final currentUser = FirebaseAuth.instance.currentUser!;
+    List<Group> groups = [];
+    String id;
+    String name;
+    List<Map<String, String>> users;
+    try {
+      CollectionReference groupsReference = FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('groups');
+
+      QuerySnapshot groupsSnapshot = await groupsReference.get();
+
+      for (var groupsDoc in groupsSnapshot.docs) {
+        var group = groupsDoc.data() as dynamic;
+
+        String id = group['id'];
+        String name = group['name'];
+        List<Map<String, String>> users = [];
+
+        List<dynamic>? usersList = group['users'];
+
+        if (usersList != null) {
+          for (var userMap in usersList) {
+            if (userMap is Map<String, dynamic>) {
+              String userId = userMap['id'];
+              String userName = userMap['nickname'];
+
+              users.add({
+                'id': userId,
+                'nickname': userName,
+              });
+            }
+          }
+        }
+
+        Group newGroup = Group(
+          groupId: id,
+          groupName: name,
+          users: users,
+        );
+        //print(newGroup);
+
+        groups.add(newGroup);
+      }
+
+      return groups;
+    } catch (error) {
+      return groups;
+    }
+  }
 }

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:popbill/widgets/home/app_drawer.dart';
 import 'package:popbill/widgets/split/add_group.dart';
+import 'package:popbill/widgets/split/all_groups.dart';
 
 class SplitPage extends StatefulWidget {
   const SplitPage({super.key});
@@ -11,11 +12,17 @@ class SplitPage extends StatefulWidget {
   State<SplitPage> createState() => _SplitPageState();
 }
 
+//To do: Display the page by the groups with the most recent transactions
+
 class _SplitPageState extends State<SplitPage> {
   @override
   void initState() {
     super.initState();
     checkInternet();
+  }
+
+  void reloadPage() {
+    setState(() {});
   }
 
   bool isConnectedToInternet = false;
@@ -73,6 +80,7 @@ class _SplitPageState extends State<SplitPage> {
                         builder: (context) {
                           return AddGroup(
                             currentUserId: currentUserId,
+                            reloadPage: reloadPage,
                           );
                         },
                       ),
@@ -83,6 +91,7 @@ class _SplitPageState extends State<SplitPage> {
               ],
             ),
             drawer: AppDrawer(),
+            body: const AllGroups(),
           );
   }
 }
