@@ -57,7 +57,7 @@ class _AddGroupState extends State<AddGroup> {
       );
       return;
     }
-    if (nickname.isEmpty) {
+    if (nickname.isEmpty || nickname.trim().isEmpty) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
