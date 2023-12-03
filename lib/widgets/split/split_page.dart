@@ -12,8 +12,6 @@ class SplitPage extends StatefulWidget {
   State<SplitPage> createState() => _SplitPageState();
 }
 
-//To do: Display the page by the groups with the most recent transactions
-
 class _SplitPageState extends State<SplitPage> {
   @override
   void initState() {

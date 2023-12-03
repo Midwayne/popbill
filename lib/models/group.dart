@@ -5,9 +5,12 @@ class Group {
     String? groupId,
     required this.groupName,
     required this.users,
-  }) : groupId = groupId ?? const Uuid().v4();
+    DateTime? timestamp, //For sorting based on activity
+  })  : groupId = groupId ?? const Uuid().v4(),
+        timestamp = timestamp ?? DateTime.now();
 
   final String groupId;
   final String groupName;
   List<Map<String, String>> users; //[{'userId' = '', 'nickname'= ''}]
+  final DateTime timestamp;
 }

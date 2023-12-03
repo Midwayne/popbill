@@ -139,16 +139,10 @@ class _AddGroupState extends State<AddGroup> {
 
     _form.currentState!.save();
 
-    //Auth service invoke
     Group finalUsers = Group(groupName: groupName, users: users);
-    print(
-        '${finalUsers.groupName}, ${finalUsers.users}, ${finalUsers.groupId}');
     AuthService().createGroup(context, finalUsers);
 
-    widget.reloadPage;
-
-    //Add this group in two places: in the groups collections such as users
-    //And in the user account for easy reload
+    widget.reloadPage();
   }
 
   @override

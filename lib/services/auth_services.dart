@@ -269,7 +269,6 @@ class AuthService {
   }
 
   void createGroup(BuildContext context, Group group) async {
-    final currentUser = FirebaseAuth.instance.currentUser!;
     try {
       CollectionReference groupsCollection =
           FirebaseFirestore.instance.collection('groups');
@@ -278,6 +277,7 @@ class AuthService {
         'id': group.groupId,
         'name': group.groupName,
         'users': group.users,
+        'timestamp': group.timestamp.toString(),
       });
 
       group.users.forEach((user) async {
@@ -317,21 +317,32 @@ class AuthService {
     List<Group> groups = [];
     String id;
     String name;
+    String timestamp;
     List<Map<String, String>> users;
     try {
-      CollectionReference groupsReference = FirebaseFirestore.instance
+      CollectionReference userGroupsReference = FirebaseFirestore.instance
           .collection('users')
           .doc(currentUser.uid)
           .collection('groups');
 
-      QuerySnapshot groupsSnapshot = await groupsReference.get();
+      QuerySnapshot userGroupsSnapshot = await userGroupsReference.get();
 
-      for (var groupsDoc in groupsSnapshot.docs) {
-        var group = groupsDoc.data() as dynamic;
+      CollectionReference groupsReference =
+          FirebaseFirestore.instance.collection('groups');
 
-        String id = group['id'];
-        String name = group['name'];
-        List<Map<String, String>> users = [];
+      for (var groupsDoc in userGroupsSnapshot.docs) {
+        var userGroup = groupsDoc.data() as dynamic;
+
+        String documentId = userGroup['id'];
+
+        DocumentSnapshot groupsSnapshot =
+            await groupsReference.doc(documentId).get();
+
+        var group = groupsSnapshot.data() as dynamic;
+        id = group['id'];
+        name = group['name'];
+        timestamp = group['timestamp'];
+        users = [];
 
         List<dynamic>? usersList = group['users'];
 
@@ -353,11 +364,14 @@ class AuthService {
           groupId: id,
           groupName: name,
           users: users,
+          timestamp: DateTime.parse(timestamp),
         );
-        //print(newGroup);
 
         groups.add(newGroup);
       }
+
+      // Sort the list of groups based on timestamp in descending order
+      groups.sort((a, b) => b.timestamp.compareTo(a.timestamp));
 
       return groups;
     } catch (error) {
