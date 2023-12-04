@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:popbill/models/group.dart';
+import 'package:popbill/widgets/split/add_group_expense.dart';
 
 //Implement - settings: Ability to change nicknames, group name, add or remove a member, Exit group option
 class GroupPage extends StatefulWidget {
@@ -8,7 +9,7 @@ class GroupPage extends StatefulWidget {
   final Group group;
 
   @override
-  State<StatefulWidget> createState() {
+  State<GroupPage> createState() {
     return _GroupPageState();
   }
 }
@@ -21,7 +22,21 @@ class _GroupPageState extends State<GroupPage> {
         title: Text(widget.group.groupName),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet<void>(
+                  isScrollControlled: true,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return DraggableScrollableSheet(
+                      initialChildSize: 1,
+                      builder: ((ctx, scrollController) {
+                        return const Center(
+                          child: AddGroupExpense(),
+                        );
+                      }),
+                    );
+                  });
+            },
             icon: const Icon(Icons.payment),
           )
         ],

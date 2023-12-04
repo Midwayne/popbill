@@ -71,8 +71,6 @@ class _AllTransactionsState extends State<AllTransactions> {
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).devicePixelRatio;
-
     String selectedTime(TimeOfDay expenseTime) {
       return expenseTime.format(context).toString();
     }

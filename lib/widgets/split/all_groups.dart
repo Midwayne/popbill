@@ -7,7 +7,7 @@ class AllGroups extends StatefulWidget {
   const AllGroups({super.key});
 
   @override
-  State<StatefulWidget> createState() {
+  State<AllGroups> createState() {
     return _AllGroupsState();
   }
 }
