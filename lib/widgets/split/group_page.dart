@@ -23,19 +23,11 @@ class _GroupPageState extends State<GroupPage> {
         actions: [
           IconButton(
             onPressed: () {
-              showModalBottomSheet<void>(
-                  isScrollControlled: true,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return DraggableScrollableSheet(
-                      initialChildSize: 1,
-                      builder: ((ctx, scrollController) {
-                        return const Center(
-                          child: AddGroupExpense(),
-                        );
-                      }),
-                    );
-                  });
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const AddGroupExpense(),
+                ),
+              );
             },
             icon: const Icon(Icons.payment),
           )
