@@ -14,6 +14,8 @@ class AddGroupExpense extends StatefulWidget {
 //Enter name, date, who paid total, add items and proportions of each user. Add expense
 
 //Problem - gap between title and amount
+//Add a dropdownbutton? for adding choice of user
+//custom user in case there is a user who does not belong to the group but wants to be added
 class _AddGroupExpenseState extends State<AddGroupExpense> {
   final selectedDateFormatter = DateFormat('dd-MM-y'); // 7/10/1996
   final selectedTimeFormatter = DateFormat.jm(); // 5:08 PM
