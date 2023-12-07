@@ -13,7 +13,6 @@ class AddGroupExpense extends StatefulWidget {
 //Transaction
 //Enter name, date, who paid total, add items and proportions of each user. Add expense
 
-//Problem - gap between title and amount
 //Add a dropdownbutton? for adding choice of user
 //custom user in case there is a user who does not belong to the group but wants to be added
 class _AddGroupExpenseState extends State<AddGroupExpense> {
@@ -74,43 +73,47 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: TextFormField(
-                  maxLength: 25,
-                  keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
-                      labelText: 'Title*', hintText: 'Food'),
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter a title';
-                    }
-                    title = value;
-                    return null;
-                  },
-                ),
-              ),
               TextFormField(
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
+                maxLength: 25,
+                keyboardType: TextInputType.text,
                 decoration: const InputDecoration(
-                    labelText: 'Amount*', hintText: '19.99'),
-                inputFormatters: [
-                  FilteringTextInputFormatter
-                      .singleLineFormatter, // No line break
-                  FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
-                ],
+                    labelText: 'Title*', hintText: 'Food'),
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Please enter the price';
+                    return 'Please enter a title';
                   }
-                  try {
-                    price = double.parse(value);
-                    return null; // Return null if parsing is successful
-                  } catch (e) {
-                    return 'Not a number';
-                  }
+                  title = value;
+                  return null;
                 },
+              ),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                          labelText: 'Amount*', hintText: '19.99'),
+                      inputFormatters: [
+                        FilteringTextInputFormatter
+                            .singleLineFormatter, // No line break
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
+                      ],
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter the price';
+                        }
+                        try {
+                          price = double.parse(value);
+                          return null; // Return null if parsing is successful
+                        } catch (e) {
+                          return 'Not a number';
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
               SizedBox(height: 5),
               Row(
