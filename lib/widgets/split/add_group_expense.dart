@@ -88,6 +88,9 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
               ),
               Row(
                 children: [
+                  //Here instead of price, add a text widget which automatically calculates the total
+                  //as the items are added. do not display this textbox if no items are added
+                  //below it, we have a drop down box to select who paid for the items
                   Expanded(
                     child: TextFormField(
                       keyboardType:
