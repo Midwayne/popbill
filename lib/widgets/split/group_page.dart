@@ -25,7 +25,7 @@ class _GroupPageState extends State<GroupPage> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (context) => const AddGroupExpense(),
+                  builder: (context) => AddGroupExpense(group: widget.group),
                 ),
               );
             },

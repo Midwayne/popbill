@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:popbill/models/group.dart';
 
 class AddGroupExpense extends StatefulWidget {
-  const AddGroupExpense({super.key});
+  const AddGroupExpense({Key? key, required this.group}) : super(key: key);
+
+  final Group group;
+
   @override
   State<AddGroupExpense> createState() {
     return _AddGroupExpenseState();
@@ -86,38 +90,6 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   return null;
                 },
               ),
-              Row(
-                children: [
-                  //Here instead of price, add a text widget which automatically calculates the total
-                  //as the items are added. do not display this textbox if no items are added
-                  //below it, we have a drop down box to select who paid for the items
-                  Expanded(
-                    child: TextFormField(
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                          labelText: 'Amount*', hintText: '19.99'),
-                      inputFormatters: [
-                        FilteringTextInputFormatter
-                            .singleLineFormatter, // No line break
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
-                      ],
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter the price';
-                        }
-                        try {
-                          price = double.parse(value);
-                          return null; // Return null if parsing is successful
-                        } catch (e) {
-                          return 'Not a number';
-                        }
-                      },
-                    ),
-                  ),
-                ],
-              ),
               SizedBox(height: 5),
               Row(
                 children: [
@@ -147,6 +119,81 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                 ],
               ),
               SizedBox(height: 5),
+              Row(
+                children: [
+                  //Here instead of price, add a text widget which automatically calculates the total
+                  //as the items are added. do not display this textbox if no items are added
+                  //below it, we have a drop down box to select who paid for the items
+                  (price != 0.0)
+                      ? Text('Total spent: $price')
+                      : Text('Add items to view total'),
+                  const SizedBox(width: 3),
+                  const Text('Add who paid the bill (Dropdown?)'),
+                  /*Expanded(
+                    child: TextFormField(
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration: const InputDecoration(
+                          labelText: 'Amount*', hintText: '19.99'),
+                      inputFormatters: [
+                        FilteringTextInputFormatter
+                            .singleLineFormatter, // No line break
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
+                      ],
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter the price';
+                        }
+                        try {
+                          price = double.parse(value);
+                          return null; // Return null if parsing is successful
+                        } catch (e) {
+                          return 'Not a number';
+                        }
+                      },
+                    ),
+                  ),*/
+                ],
+              ),
+              const SizedBox(height: 5),
+              Center(
+                child: ElevatedButton(
+                  style: const ButtonStyle(
+                    elevation: MaterialStatePropertyAll(6),
+                  ),
+                  onPressed: () {},
+                  child: const Text(
+                    'Add',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 5),
+              Divider(
+                height: 20,
+                thickness: 5,
+                //indent: 20,
+                //endIndent: 0,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 5),
+              Center(
+                child: ElevatedButton(
+                  style: const ButtonStyle(
+                    elevation: MaterialStatePropertyAll(6),
+                  ),
+                  onPressed: () {},
+                  child: const Text(
+                    'Add item',
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),
