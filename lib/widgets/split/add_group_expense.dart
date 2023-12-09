@@ -53,7 +53,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
         return Theme(
           data: ThemeData.from(
             colorScheme: Theme.of(context).colorScheme,
-          ), // Adjust as needed
+          ),
           child: child!,
         );
       },
@@ -90,7 +90,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   return null;
                 },
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Row(
                 children: [
                   Expanded(
@@ -104,7 +104,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   ),
                 ],
               ),
-              SizedBox(height: 2),
+              const SizedBox(height: 2),
               Row(
                 children: [
                   Expanded(
@@ -118,7 +118,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   ),
                 ],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Row(
                 children: [
                   //Here instead of price, add a text widget which automatically calculates the total
@@ -126,7 +126,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   //below it, we have a drop down box to select who paid for the items
                   (price != 0.0)
                       ? Text('Total spent: $price')
-                      : Text('Add items to view total'),
+                      : const Text('Add items to view total'),
                   const SizedBox(width: 3),
                   const Text('Add who paid the bill (Dropdown?)'),
                   /*Expanded(

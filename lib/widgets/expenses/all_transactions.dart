@@ -145,7 +145,8 @@ class _AllTransactionsState extends State<AllTransactions> {
           future: _getData(),
           builder: (ctx1, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              //return const CircularProgressIndicator();
+              return const Text('Fetching your expenses...');
             } else if (snapshot.hasError) {
               return Text('Error: ${snapshot.error}');
             } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

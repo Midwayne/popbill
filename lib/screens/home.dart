@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:popbill/screens/splash.dart';
+import 'package:popbill/screens/currently_building.dart';
 import 'package:popbill/widgets/expenses/expenses_page.dart';
 import 'package:popbill/widgets/split/split_page.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,7 +14,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   var _selectedIndex = 1;
   static const List<Widget> _widgetOptions = [
-    SplashScreen(),
+    CurrentlyBuilding(),
     ExpensesPage(),
     SplitPage(),
   ];
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /*
   String _pageTitle(int selectedIndex) {
     switch (selectedIndex) {
       case 0:
@@ -36,16 +38,17 @@ class _HomeScreenState extends State<HomeScreen> {
         return 'PopBill';
     }
   }
+  */
 
   @override
   Widget build(BuildContext context) {
-    final deviceSize = MediaQuery.of(context).devicePixelRatio;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 0,
       ),
       //drawer:
       body: _widgetOptions.elementAt(_selectedIndex),
+      /*
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: Theme.of(context).colorScheme.onPrimary,
         unselectedItemColor: Theme.of(context).colorScheme.inversePrimary,
@@ -64,6 +67,29 @@ class _HomeScreenState extends State<HomeScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.person_add),
             label: 'Split',
+          ),
+        ],
+      ),
+      */
+      bottomNavigationBar: CurvedNavigationBar(
+        color: Theme.of(context).colorScheme.primary,
+        backgroundColor: Colors.white,
+        animationCurve: Curves.fastEaseInToSlowEaseOut,
+        //animationCurve: Curves.fastOutSlowIn,
+        onTap: _onItemTapped,
+        height: 65,
+        items: <Widget>[
+          Icon(
+            Icons.align_horizontal_left,
+            color: Theme.of(context).colorScheme.onSecondary,
+          ),
+          Icon(
+            Icons.attach_money,
+            color: Theme.of(context).colorScheme.onSecondary,
+          ),
+          Icon(
+            Icons.person_add,
+            color: Theme.of(context).colorScheme.onSecondary,
           ),
         ],
       ),
