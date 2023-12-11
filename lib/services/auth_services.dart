@@ -113,13 +113,6 @@ class AuthService {
       //Add the below code only once to firestore.
       String email = FirebaseAuth.instance.currentUser!.email.toString();
       addUserDetailsToFirestore(context, email);
-
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Welcome!'),
-        ),
-      );
     } on FirebaseAuthException catch (error) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -130,8 +123,18 @@ class AuthService {
     }
   }
 
-  void signOut() async {
-    await FirebaseAuth.instance.signOut();
+  void signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.of(context).pop();
+    } on FirebaseAuthException catch (error) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.message ?? 'An unexpected error occurred.'),
+        ),
+      );
+    }
   }
 
   void deleteAccount(BuildContext context) async {

@@ -3,10 +3,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:popbill/widgets/user_profile/user_profile_page.dart';
 
 class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
+  //final GlobalKey columnKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: ListView(
+      child: Column(
+        //key: columnKey,
         // Important: Remove any padding from the ListView.
         //padding: EdgeInsets.zero,
         children: [
@@ -51,6 +54,9 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
+          const Spacer(),
+          const Text('Created by Kushal Krishna'),
+          SizedBox(height: MediaQuery.of(context).size.height * 0.1)
         ],
       ),
     );

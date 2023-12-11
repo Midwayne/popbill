@@ -21,7 +21,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
         actions: [
           IconButton(
             onPressed: () {
-              AuthService().signOut();
+              AuthService().signOut(context);
             },
             icon: const Icon(Icons.logout),
           ),
