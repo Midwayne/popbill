@@ -42,6 +42,9 @@ class AppDetails extends StatelessWidget {
   }
 }
 */
+
+// This widget is not rendering properly on some devices
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
