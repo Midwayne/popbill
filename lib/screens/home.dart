@@ -11,8 +11,10 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
+//How do I change default page when the app is restarted using curved_navigation_bar
+//Even if the _selectedIndex is set to 1, the expense screen renders while the bottom tab is at 0
 class _HomeScreenState extends State<HomeScreen> {
-  var _selectedIndex = 1;
+  var _selectedIndex = 0;
   static const List<Widget> _widgetOptions = [
     CurrentlyBuilding(),
     ExpensesPage(),
