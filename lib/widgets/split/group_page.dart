@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:popbill/models/group.dart';
 import 'package:popbill/widgets/split/add_group_expense.dart';
 
-//Implement - settings: Ability to change nicknames, group name, add or remove a member, Exit group option
 class GroupPage extends StatefulWidget {
   const GroupPage({Key? key, required this.group}) : super(key: key);
 
@@ -30,7 +29,13 @@ class _GroupPageState extends State<GroupPage> {
               );
             },
             icon: const Icon(Icons.payment),
-          )
+          ),
+          IconButton(
+            onPressed: () {
+              //Implement - settings: Ability to change nicknames, group name, add or remove a member, Exit group option
+            },
+            icon: const Icon(Icons.settings),
+          ),
         ],
       ),
       body: Column(), //Widget to show All transactions in a group,
