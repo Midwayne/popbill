@@ -4,6 +4,7 @@ import 'package:popbill/services/auth_services.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 //To implement: The page doesn't reload automatically even after adding
+// Build edit nickname feature
 
 class AddGroup extends StatefulWidget {
   const AddGroup({
@@ -96,8 +97,6 @@ class _AddGroupState extends State<AddGroup> {
             'nickname': nickname,
           },
         );
-
-        print(users);
       });
     } else {
       ScaffoldMessenger.of(context).clearSnackBars();
@@ -273,32 +272,71 @@ class _AddGroupState extends State<AddGroup> {
                       ],
                     ),
               SizedBox(height: deviceSize * 10),
-              Text('Users added: ${users.length}'),
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary,
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.group,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                    const SizedBox(width: 8.0),
+                    Text(
+                      'Users added: ${users.length}',
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(top: 10),
-                child: Row(
+                child: Wrap(
+                  spacing: 10.0, // Adjust the spacing between users
+                  runSpacing: 10.0, // Adjust the spacing between rows
                   children: users.map((user) {
-                    final userId = user['userId'];
+                    final userId = user['id'];
                     final nickname = user['nickname'];
 
-                    return GestureDetector(
-                      onLongPress: () {
-                        if (userId != 'currentUserId') {
-                          //removeUserFromGroup
+                    return PopupMenuButton<int>(
+                      itemBuilder: (context) => [
+                        const PopupMenuItem<int>(
+                          value: 1,
+                          child: ListTile(
+                            leading: Icon(Icons.edit),
+                            title: Text('Edit Nickname'),
+                          ),
+                        ),
+                        const PopupMenuItem<int>(
+                          value: 2,
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.remove,
+                              color: Colors.red,
+                            ),
+                            title: Text('Remove User'),
+                          ),
+                        ),
+                      ],
+                      onSelected: (value) {
+                        if (value == 1) {
+                          // Add logic to edit the nickname
+                        } else if (value == 2) {
+                          removeUserFromGroup(userId!, nickname!);
                         }
                       },
-                      child: Container(
-                        padding: const EdgeInsets.all(8.0),
-                        margin: const EdgeInsets.all(8.0),
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius: BorderRadius.circular(20.0),
-                        ),
-                        child: Text(
-                          '$nickname',
-                          style: const TextStyle(
-                            color: Colors.white,
-                          ),
+                      child: Text(
+                        '$nickname',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w400,
+                          fontSize: 16.0,
                         ),
                       ),
                     );
