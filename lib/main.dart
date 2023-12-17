@@ -6,7 +6,6 @@ import 'package:popbill/screens/authorisation.dart';
 import 'package:popbill/screens/home.dart';
 import 'package:popbill/screens/splash.dart';
 import 'firebase_options.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 void main() async {

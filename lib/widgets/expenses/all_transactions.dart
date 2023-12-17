@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:popbill/models/user_expense.dart';
 import 'package:popbill/services/auth_services.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class AllTransactions extends StatefulWidget {
   const AllTransactions({Key? key, required int year, required int month})
@@ -204,55 +205,58 @@ class _AllTransactionsState extends State<AllTransactions> {
                                 ),
                               ),
                               ...transactions.map(
-                                (expense) => Dismissible(
+                                (expense) => Slidable(
                                   key: Key(expense.title),
-                                  background: Container(
-                                    color: Theme.of(context).colorScheme.error,
-                                    child: const Align(
-                                      alignment: Alignment.centerRight,
-                                      child: Icon(
-                                        Icons.delete,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  onDismissed: (direction) async {
-                                    Future<int> status = AuthService()
-                                        .removeUserExpense(context, expense);
-
-                                    int statusValue = await status;
-
-                                    if (statusValue == 1) {
-                                      ScaffoldMessenger.of(context)
-                                          .clearSnackBars();
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content:
-                                              const Text('Expense deleted.'),
-                                          action: SnackBarAction(
-                                            label: 'Undo',
-                                            onPressed: () {
-                                              AuthService().addUserExpense(
+                                  endActionPane: ActionPane(
+                                    motion: const ScrollMotion(),
+                                    extentRatio: 0.3,
+                                    children: [
+                                      SlidableAction(
+                                        label: 'Delete',
+                                        backgroundColor: Colors.red,
+                                        icon: Icons.delete,
+                                        onPressed: (context) async {
+                                          Future<int> status = AuthService()
+                                              .removeUserExpense(
                                                   context, expense);
-                                              _pullRefresh();
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    } else {
-                                      ScaffoldMessenger.of(context)
-                                          .clearSnackBars();
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                              'An unexpected error occurred while deleting expense.\nPlease try again'),
-                                        ),
-                                      );
-                                    }
-                                    _pullRefresh();
-                                  },
+                                          int statusValue = await status;
+
+                                          if (statusValue == 1) {
+                                            ScaffoldMessenger.of(context)
+                                                .clearSnackBars();
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: const Text(
+                                                    'Expense deleted.'),
+                                                action: SnackBarAction(
+                                                  label: 'Undo',
+                                                  onPressed: () {
+                                                    AuthService()
+                                                        .addUserExpense(
+                                                            context, expense);
+                                                    _pullRefresh();
+                                                  },
+                                                ),
+                                              ),
+                                            );
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .clearSnackBars();
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              const SnackBar(
+                                                content: Text(
+                                                  'An unexpected error occurred while deleting expense.\nPlease try again',
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          _pullRefresh();
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                   child: ListTile(
                                     subtitle: Column(children: [
                                       Row(
@@ -313,187 +317,3 @@ class _AllTransactionsState extends State<AllTransactions> {
     );
   }
 }
-/*
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:popbill/bloc/userExpense_bloc.dart';
-import 'package:intl/intl.dart';
-
-class AllTransactions extends StatefulWidget {
-  const AllTransactions({Key? key, required int year, required int month})
-      : filterYear = year,
-        filterMonth = month,
-        super(key: key);
-
-  final int filterYear;
-  final int filterMonth;
-
-  @override
-  State<AllTransactions> createState() {
-    return _AllTransactionsState();
-  }
-}
-
-class _AllTransactionsState extends State<AllTransactions> {
-  late ExpenseCubit _expenseCubit;
-
-  @override
-  void initState() {
-    super.initState();
-    _expenseCubit = ExpenseCubit();
-    _expenseCubit.fetchExpenses(widget.filterYear, widget.filterMonth);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<ExpenseCubit, ExpenseState>(
-      builder: (context, state) {
-        if (state is ExpenseLoading) {
-          return const CircularProgressIndicator();
-        } else if (state is ExpenseLoaded) {
-          return Column(
-            children: [
-              Card(
-                elevation: 5,
-                margin:
-                    EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Container(
-                  padding:
-                      EdgeInsets.all(MediaQuery.of(context).size.width * 0.04),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Total Expenses',
-                        style: TextStyle(
-                          fontSize:
-                              Theme.of(context).textTheme.titleLarge!.fontSize,
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                      Text(
-                        'Rs. ${state.totalPeriodExpense.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize:
-                              Theme.of(context).textTheme.titleLarge!.fontSize,
-                          fontWeight: FontWeight.w500,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Scaffold(
-                  body: RefreshIndicator(
-                    onRefresh: () async {
-                      _expenseCubit.fetchExpenses(
-                          widget.filterYear, widget.filterMonth);
-                    },
-                    child: ListView.builder(
-                      itemCount: state.expenses.length,
-                      itemBuilder: (context, index) {
-                        final expense = state.expenses[index];
-
-                        return Dismissible(
-                          key: Key(expense.title),
-                          background: Container(
-                            color: Theme.of(context).colorScheme.error,
-                            child: const Align(
-                              alignment: Alignment.centerRight,
-                              child: Icon(
-                                Icons.delete,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                          onDismissed: (direction) async {
-                            // Handle dismissal
-                            // Add your logic to remove the expense
-                            // _expenseCubit.removeExpense(expense);
-                          },
-                          child: ListTile(
-                            subtitle: Column(
-                              children: [
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      expense.title,
-                                      style: TextStyle(
-                                        fontSize: Theme.of(context)
-                                            .textTheme
-                                            .titleLarge!
-                                            .fontSize,
-                                        fontWeight: FontWeight.bold,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Text(
-                                      'Rs. ${expense.amount.toStringAsFixed(2)}',
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Date: ${selectedDate(expense.date)}',
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    Text(
-                                      'Time: ${selectedTime(expense.time)}',
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          );
-        } else if (state is ExpenseError) {
-          return Text('Error: ${state.errorMessage}');
-        } else {
-          return const Text('Unexpected state');
-        }
-      },
-    );
-  }
-
-  String selectedDate(DateTime expenseDate) {
-    final selectedDateFormatter = DateFormat('dd-MM-y');
-    return selectedDateFormatter.format(expenseDate).toString();
-  }
-
-  String selectedTime(TimeOfDay expenseTime) {
-    return expenseTime.format(context).toString();
-  }
-
-  @override
-  void dispose() {
-    _expenseCubit.close();
-    super.dispose();
-  }
-}
-*/
