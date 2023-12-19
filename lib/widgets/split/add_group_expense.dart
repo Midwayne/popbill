@@ -29,6 +29,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
   TimeOfDay selectedTime = TimeOfDay.now();
   String title = '';
   double price = 0.0;
+  String selectedNickname = '';
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -129,6 +130,36 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                       : const Text('Add items to view total'),
                   const SizedBox(width: 3),
                   const Text('Add who paid the bill (Dropdown?)'),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: DropdownButton<String>(
+                      value: selectedNickname,
+                      hint: const Text('Select a member'),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          selectedNickname = newValue!;
+                        });
+                      },
+                      /*items: [
+                        for (var user in widget.group.users)
+                          DropdownMenuItem<String>(
+                            value: user['nickname']!, // userID or username?
+                            child: Text(user['nickname']!),
+                          ),
+                        const DropdownMenuItem<String>(
+                          value: 'Others',
+                          child: Text('Others'),
+                        ),
+                      ],*/
+                      // Fix dropdown, unexpected error
+                      items: widget.group.users.map((user) {
+                        return DropdownMenuItem<String>(
+                          value: user['userId'],
+                          child: const Text('nickname'),
+                        );
+                      }).toList(),
+                    ),
+                  ),
                   /*Expanded(
                     child: TextFormField(
                       keyboardType:
