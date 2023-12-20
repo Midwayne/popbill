@@ -29,7 +29,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
   TimeOfDay selectedTime = TimeOfDay.now();
   String title = '';
   double price = 0.0;
-  String selectedNickname = '';
+  String selectedUser = '';
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -64,6 +64,15 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
       setState(() {
         selectedTime = picked;
       });
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.group.users.isNotEmpty) {
+      selectedUser = widget.group.users.first['id'] ?? '';
     }
   }
 
@@ -125,41 +134,63 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   //Here instead of price, add a text widget which automatically calculates the total
                   //as the items are added. do not display this textbox if no items are added
                   //below it, we have a drop down box to select who paid for the items
-                  (price != 0.0)
-                      ? Text('Total spent: $price')
-                      : const Text('Add items to view total'),
+                  Expanded(
+                    child: (price != 0.0)
+                        ? Text('Total spent: $price')
+                        : const Text('Total spent: 0'),
+                  ),
+
                   const SizedBox(width: 3),
-                  const Text('Add who paid the bill (Dropdown?)'),
+/*
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: DropdownButton<String>(
-                      value: selectedNickname,
+                      value: selectedUser,
                       hint: const Text('Select a member'),
                       onChanged: (String? newValue) {
                         setState(() {
-                          selectedNickname = newValue!;
+                          selectedUser = newValue!;
                         });
                       },
-                      /*items: [
-                        for (var user in widget.group.users)
-                          DropdownMenuItem<String>(
-                            value: user['nickname']!, // userID or username?
-                            child: Text(user['nickname']!),
-                          ),
-                        const DropdownMenuItem<String>(
-                          value: 'Others',
-                          child: Text('Others'),
-                        ),
-                      ],*/
-                      // Fix dropdown, unexpected error
-                      items: widget.group.users.map((user) {
+                      items: widget.group.users.map<DropdownMenuItem<String>>(
+                          (Map<String, String> user) {
                         return DropdownMenuItem<String>(
-                          value: user['userId'],
-                          child: const Text('nickname'),
+                          value: user['id'],
+                          child: Text(user['nickname']!),
                         );
                       }).toList(),
                     ),
+                  ),*/
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: DropdownButtonFormField<String>(
+                        decoration: InputDecoration(
+                          labelText: 'Who paid the bill?',
+                          border: OutlineInputBorder(),
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          contentPadding: EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                        ),
+                        value: selectedUser,
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            selectedUser = newValue!;
+                          });
+                        },
+                        items: widget.group.users.map<DropdownMenuItem<String>>(
+                          (Map<String, String> user) {
+                            return DropdownMenuItem<String>(
+                              value: user['id'],
+                              child: Text(user['nickname']!),
+                            );
+                          },
+                        ).toList(),
+                      ),
+                    ),
                   ),
+
                   /*Expanded(
                     child: TextFormField(
                       keyboardType:

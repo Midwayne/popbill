@@ -11,6 +11,6 @@ class Group {
 
   final String groupId;
   final String groupName;
-  List<Map<String, String>> users; //[{'userId' = '', 'nickname'= ''}]
+  List<Map<String, String>> users; //[{'id' = '', 'nickname'= ''}]
   final DateTime timestamp;
 }
