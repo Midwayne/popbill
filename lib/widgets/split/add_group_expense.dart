@@ -67,6 +67,92 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
     }
   }
 
+  void _submit() {}
+
+  void _addItem() async {
+    String itemName = '';
+    double itemPrice = 0.0;
+    List<String> selectedConsumers = [];
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Add Item'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                decoration: const InputDecoration(labelText: 'Item Name'),
+                onChanged: (value) {
+                  itemName = value;
+                },
+              ),
+              const SizedBox(height: 10),
+              TextFormField(
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(labelText: 'Item Price'),
+                inputFormatters: [
+                  FilteringTextInputFormatter
+                      .singleLineFormatter, // No line break
+                  FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
+                ],
+                onChanged: (value) {
+                  try {
+                    itemPrice = double.parse(value);
+                  } catch (e) {
+                    // Handle invalid input
+                  }
+                },
+              ),
+              const SizedBox(height: 10),
+              const Text('Select consumers:'),
+              Column(
+                children: widget.group.users.map((user) {
+                  final userId = user['id'];
+                  final userNickname = user['nickname'];
+
+                  //Unable to select the consumers
+                  return CheckboxListTile(
+                    title: Text(userNickname!),
+                    value: selectedConsumers.contains(userId),
+                    onChanged: (value) {
+                      setState(() {
+                        if (value != null && value) {
+                          selectedConsumers.add(userId!);
+                        } else {
+                          selectedConsumers.remove(userId);
+                        }
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                // Handle the data, e.g., add it to your state
+                // You can store the item in a list or perform other actions
+                print('Item Name: $itemName');
+                print('Item Price: $itemPrice');
+                print('Selected Consumers: $selectedConsumers');
+
+                // Perform any additional logic or state updates here
+
+                Navigator.of(context).pop();
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -167,10 +253,10 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                       child: DropdownButtonFormField<String>(
                         decoration: InputDecoration(
                           labelText: 'Who paid the bill?',
-                          border: OutlineInputBorder(),
+                          border: const OutlineInputBorder(),
                           filled: true,
                           fillColor: Colors.grey[200],
-                          contentPadding: EdgeInsets.symmetric(
+                          contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                         ),
                         value: selectedUser,
@@ -224,7 +310,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   style: const ButtonStyle(
                     elevation: MaterialStatePropertyAll(6),
                   ),
-                  onPressed: () {},
+                  onPressed: _submit,
                   child: const Text(
                     'Add',
                     style: TextStyle(
@@ -247,7 +333,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   style: const ButtonStyle(
                     elevation: MaterialStatePropertyAll(6),
                   ),
-                  onPressed: () {},
+                  onPressed: _addItem,
                   child: const Text(
                     'Add item',
                     style: TextStyle(
