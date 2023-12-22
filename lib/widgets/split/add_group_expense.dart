@@ -69,6 +69,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
 
   void _submit() {}
 
+  /*
   void _addItem() async {
     String itemName = '';
     double itemPrice = 0.0;
@@ -79,58 +80,60 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Add Item'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextFormField(
-                decoration: const InputDecoration(labelText: 'Item Name'),
-                onChanged: (value) {
-                  itemName = value;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                keyboardType:
-                    const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Item Price'),
-                inputFormatters: [
-                  FilteringTextInputFormatter
-                      .singleLineFormatter, // No line break
-                  FilteringTextInputFormatter.allow(
-                      RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
-                ],
-                onChanged: (value) {
-                  try {
-                    itemPrice = double.parse(value);
-                  } catch (e) {
-                    // Handle invalid input
-                  }
-                },
-              ),
-              const SizedBox(height: 10),
-              const Text('Select consumers:'),
-              Column(
-                children: widget.group.users.map((user) {
-                  final userId = user['id'];
-                  final userNickname = user['nickname'];
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Item Name'),
+                  onChanged: (value) {
+                    itemName = value;
+                  },
+                ),
+                const SizedBox(height: 10),
+                TextFormField(
+                  keyboardType:
+                      const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(labelText: 'Item Price'),
+                  inputFormatters: [
+                    FilteringTextInputFormatter
+                        .singleLineFormatter, // No line break
+                    FilteringTextInputFormatter.allow(
+                        RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
+                  ],
+                  onChanged: (value) {
+                    try {
+                      itemPrice = double.parse(value);
+                    } catch (e) {
+                      // Handle invalid input
+                    }
+                  },
+                ),
+                const SizedBox(height: 10),
+                const Text('Select consumers:'),
+                Column(
+                  children: widget.group.users.map((user) {
+                    final userId = user['id'];
+                    final userNickname = user['nickname'];
 
-                  //Unable to select the consumers
-                  return CheckboxListTile(
-                    title: Text(userNickname!),
-                    value: selectedConsumers.contains(userId),
-                    onChanged: (value) {
-                      setState(() {
-                        if (value != null && value) {
-                          selectedConsumers.add(userId!);
-                        } else {
-                          selectedConsumers.remove(userId);
-                        }
-                      });
-                    },
-                  );
-                }).toList(),
-              ),
-            ],
+                    //Unable to select the consumers
+                    return CheckboxListTile(
+                      title: Text(userNickname!),
+                      value: selectedConsumers.contains(userId),
+                      onChanged: (value) {
+                        setState(() {
+                          if (value != null && value) {
+                            selectedConsumers.add(userId!);
+                          } else {
+                            selectedConsumers.remove(userId);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ],
+            ),
           ),
           actions: [
             ElevatedButton(
@@ -148,6 +151,157 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
               child: const Text('Add'),
             ),
           ],
+        );
+      },
+    );
+  }*/
+
+  //The logic given below is wrong. Fix it
+  // Also put the percentage textbox beside the checklist
+  void _addItem() async {
+    String itemName = '';
+    double itemPrice = 0.0;
+    List<Map<String, dynamic>> selectedConsumers = [];
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) {
+            return AlertDialog(
+              title: const Text('Add Item'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      decoration: const InputDecoration(labelText: 'Item Name'),
+                      onChanged: (value) {
+                        itemName = value;
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: true),
+                      decoration:
+                          const InputDecoration(labelText: 'Item Price'),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.singleLineFormatter,
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'^\d+\.?\d{0,2}$')),
+                      ],
+                      onChanged: (value) {
+                        try {
+                          itemPrice = double.parse(value);
+                        } catch (e) {
+                          // Handle invalid input
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Select consumers:'),
+                    Column(
+                      children: widget.group.users.map((user) {
+                        final userId = user['id'];
+                        final userNickname = user['nickname'];
+
+                        double defaultPercentage =
+                            100.0 / widget.group.users.length;
+                        double selectedPercentage = defaultPercentage;
+
+                        return CheckboxListTile(
+                          title: Text(userNickname!),
+                          value: selectedConsumers
+                              .any((consumer) => consumer['id'] == userId),
+                          onChanged: (value) {
+                            setState(() {
+                              if (value != null && value) {
+                                selectedConsumers.add({
+                                  'id': userId,
+                                  'percentage': defaultPercentage,
+                                });
+                              } else {
+                                // Remove user from the list or set percentage to 0%
+                                selectedConsumers.removeWhere(
+                                    (consumer) => consumer['id'] == userId);
+                              }
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Enter percentage:'),
+                    Column(
+                      children: selectedConsumers.map((consumer) {
+                        final userId = consumer['id'];
+                        final userNickname = widget.group.users.firstWhere(
+                            (user) => user['id'] == userId)['nickname'];
+
+                        return TextFormField(
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                          decoration: InputDecoration(
+                            labelText: 'Percentage for $userNickname',
+                          ),
+                          initialValue: consumer['percentage'].toString(),
+                          onChanged: (value) {
+                            try {
+                              double enteredPercentage = double.parse(value);
+                              if (enteredPercentage >= 0 &&
+                                  enteredPercentage <= 100) {
+                                setState(() {
+                                  consumer['percentage'] = enteredPercentage;
+                                });
+                              }
+                            } catch (e) {
+                              // Handle invalid input
+                            }
+                          },
+                        );
+                      }).toList(),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text('Unaccounted Percentage:'),
+                    Text(
+                      '${(100 - selectedConsumers.fold(0, (sum, consumer) => sum + consumer['percentage'])).toStringAsFixed(2)}%',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () {
+                    double totalPercentage = selectedConsumers.fold(
+                        0, (sum, consumer) => sum + consumer['percentage']);
+                    if (totalPercentage < 100) {
+                      // Validation failed
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Total percentage must be 100%'),
+                        ),
+                      );
+                    } else {
+                      // Handle the data, e.g., add it to your state
+                      // You can store the item in a list or perform other actions
+                      print('Item Name: $itemName');
+                      print('Item Price: $itemPrice');
+                      print('Selected Consumers: $selectedConsumers');
+
+                      // Perform any additional logic or state updates here
+
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: const Text('Add'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
