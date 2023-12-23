@@ -69,95 +69,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
 
   void _submit() {}
 
-  /*
-  void _addItem() async {
-    String itemName = '';
-    double itemPrice = 0.0;
-    List<String> selectedConsumers = [];
-
-    await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Add Item'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Item Name'),
-                  onChanged: (value) {
-                    itemName = value;
-                  },
-                ),
-                const SizedBox(height: 10),
-                TextFormField(
-                  keyboardType:
-                      const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Item Price'),
-                  inputFormatters: [
-                    FilteringTextInputFormatter
-                        .singleLineFormatter, // No line break
-                    FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
-                  ],
-                  onChanged: (value) {
-                    try {
-                      itemPrice = double.parse(value);
-                    } catch (e) {
-                      // Handle invalid input
-                    }
-                  },
-                ),
-                const SizedBox(height: 10),
-                const Text('Select consumers:'),
-                Column(
-                  children: widget.group.users.map((user) {
-                    final userId = user['id'];
-                    final userNickname = user['nickname'];
-
-                    //Unable to select the consumers
-                    return CheckboxListTile(
-                      title: Text(userNickname!),
-                      value: selectedConsumers.contains(userId),
-                      onChanged: (value) {
-                        setState(() {
-                          if (value != null && value) {
-                            selectedConsumers.add(userId!);
-                          } else {
-                            selectedConsumers.remove(userId);
-                          }
-                        });
-                      },
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                // Handle the data, e.g., add it to your state
-                // You can store the item in a list or perform other actions
-                print('Item Name: $itemName');
-                print('Item Price: $itemPrice');
-                print('Selected Consumers: $selectedConsumers');
-
-                // Perform any additional logic or state updates here
-
-                Navigator.of(context).pop();
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }*/
-
-  //The logic given below is wrong. Fix it
-  // Also put the percentage textbox beside the checklist
+  //Add logic for custom ratio/percentage selection later
   void _addItem() async {
     String itemName = '';
     double itemPrice = 0.0;
@@ -175,7 +87,10 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextFormField(
-                      decoration: const InputDecoration(labelText: 'Item Name'),
+                      decoration: const InputDecoration(
+                        labelText: 'Item Name',
+                        hintText: 'Beetroot',
+                      ),
                       onChanged: (value) {
                         itemName = value;
                       },
@@ -184,8 +99,10 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                     TextFormField(
                       keyboardType:
                           const TextInputType.numberWithOptions(decimal: true),
-                      decoration:
-                          const InputDecoration(labelText: 'Item Price'),
+                      decoration: const InputDecoration(
+                        labelText: 'Item Price',
+                        hintText: '400.5',
+                      ),
                       inputFormatters: [
                         FilteringTextInputFormatter.singleLineFormatter,
                         FilteringTextInputFormatter.allow(
@@ -206,10 +123,6 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                         final userId = user['id'];
                         final userNickname = user['nickname'];
 
-                        double defaultPercentage =
-                            100.0 / widget.group.users.length;
-                        double selectedPercentage = defaultPercentage;
-
                         return CheckboxListTile(
                           title: Text(userNickname!),
                           value: selectedConsumers
@@ -219,10 +132,8 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                               if (value != null && value) {
                                 selectedConsumers.add({
                                   'id': userId,
-                                  'percentage': defaultPercentage,
                                 });
                               } else {
-                                // Remove user from the list or set percentage to 0%
                                 selectedConsumers.removeWhere(
                                     (consumer) => consumer['id'] == userId);
                               }
@@ -231,68 +142,43 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                         );
                       }).toList(),
                     ),
-                    const SizedBox(height: 10),
-                    const Text('Enter percentage:'),
-                    Column(
-                      children: selectedConsumers.map((consumer) {
-                        final userId = consumer['id'];
-                        final userNickname = widget.group.users.firstWhere(
-                            (user) => user['id'] == userId)['nickname'];
-
-                        return TextFormField(
-                          keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true),
-                          decoration: InputDecoration(
-                            labelText: 'Percentage for $userNickname',
-                          ),
-                          initialValue: consumer['percentage'].toString(),
-                          onChanged: (value) {
-                            try {
-                              double enteredPercentage = double.parse(value);
-                              if (enteredPercentage >= 0 &&
-                                  enteredPercentage <= 100) {
-                                setState(() {
-                                  consumer['percentage'] = enteredPercentage;
-                                });
-                              }
-                            } catch (e) {
-                              // Handle invalid input
-                            }
-                          },
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text('Unaccounted Percentage:'),
-                    Text(
-                      '${(100 - selectedConsumers.fold(0, (sum, consumer) => sum + consumer['percentage'])).toStringAsFixed(2)}%',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                   ],
                 ),
               ),
               actions: [
                 ElevatedButton(
                   onPressed: () {
-                    double totalPercentage = selectedConsumers.fold(
-                        0, (sum, consumer) => sum + consumer['percentage']);
-                    if (totalPercentage < 100) {
-                      // Validation failed
+                    if (itemName.trim().isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Total percentage must be 100%'),
+                          content: Text('Please enter the item name'),
+                        ),
+                      );
+                    } else if (itemPrice <= 0.0 ||
+                        itemPrice.toString().trim().isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please enter a valid amount'),
+                        ),
+                      );
+                    } else if (selectedConsumers.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Please select at least one user'),
                         ),
                       );
                     } else {
-                      // Handle the data, e.g., add it to your state
-                      // You can store the item in a list or perform other actions
+                      // Calculate the equal share for each consumer
+                      double equalShare = itemPrice / selectedConsumers.length;
+
+                      // Update the selectedConsumers with equal shares
+                      selectedConsumers.forEach((consumer) {
+                        consumer['percentage'] = equalShare;
+                      });
+
                       print('Item Name: $itemName');
                       print('Item Price: $itemPrice');
                       print('Selected Consumers: $selectedConsumers');
-
-                      // Perform any additional logic or state updates here
 
                       Navigator.of(context).pop();
                     }
@@ -306,10 +192,10 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
       },
     );
   }
+  // Add the item price to total bill amount and store the data in a list of items
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     if (widget.group.users.isNotEmpty) {
       selectedUser = widget.group.users.first['id'] ?? '';
