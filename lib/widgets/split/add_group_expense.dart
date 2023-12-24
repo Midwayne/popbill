@@ -193,6 +193,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
     );
   }
   // Add the item price to total bill amount and store the data in a list of items
+  //Create a model group_expense for this
 
   @override
   void initState() {
