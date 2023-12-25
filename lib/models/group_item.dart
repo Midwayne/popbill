@@ -6,6 +6,6 @@ class GroupItem {
   });
 
   String itemTitle;
-  String itemPrice;
-  List<Map<String, String>> consumerProportions;
+  double itemPrice;
+  List<Map<String, dynamic>> consumerProportions;
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:popbill/models/group.dart';
+import 'package:popbill/models/group_item.dart';
+import 'package:popbill/models/group_expense.dart';
 
 class AddGroupExpense extends StatefulWidget {
   const AddGroupExpense({Key? key, required this.group}) : super(key: key);
@@ -30,6 +32,7 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
   String title = '';
   double price = 0.0;
   String selectedUser = '';
+  List<GroupItem> items = [];
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -176,9 +179,12 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
                         consumer['percentage'] = equalShare;
                       });
 
-                      print('Item Name: $itemName');
-                      print('Item Price: $itemPrice');
-                      print('Selected Consumers: $selectedConsumers');
+                      items.add(GroupItem(
+                        itemTitle: itemName,
+                        itemPrice: itemPrice,
+                        consumerProportions: selectedConsumers,
+                      ));
+                      print(items);
 
                       Navigator.of(context).pop();
                     }
