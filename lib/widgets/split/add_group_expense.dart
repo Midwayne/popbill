@@ -176,17 +176,23 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
 
                       // Update the selectedConsumers with equal shares
                       selectedConsumers.forEach((consumer) {
-                        consumer['percentage'] = equalShare;
+                        consumer['share'] = equalShare;
                       });
 
-                      items.add(GroupItem(
-                        itemTitle: itemName,
-                        itemPrice: itemPrice,
-                        consumerProportions: selectedConsumers,
-                      ));
-                      print(items);
+                      setState(() {
+                        items.add(GroupItem(
+                          itemTitle: itemName,
+                          itemPrice: itemPrice,
+                          consumerProportions: selectedConsumers,
+                        ));
 
+                        price = calculateTotalPrice();
+                      });
+
+                      //The page is not reloading automatically. Check it out
+                      //It reloads when the user clicks on the dropbox
                       Navigator.of(context).pop();
+                      //setState(() {});
                     }
                   },
                   child: const Text('Add'),
@@ -201,6 +207,14 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
   // Add the item price to total bill amount and store the data in a list of items
   //Create a model group_expense for this
 
+  double calculateTotalPrice() {
+    double total = 0.0;
+    for (var item in items) {
+      total += item.itemPrice;
+    }
+    return total;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -213,183 +227,212 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Add an expense')),
-      body: Form(
-        key: _form,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextFormField(
-                maxLength: 25,
-                keyboardType: TextInputType.text,
-                decoration: const InputDecoration(
-                    labelText: 'Title*', hintText: 'Food'),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a title';
-                  }
-                  title = value;
-                  return null;
-                },
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Date: ${selectedDateFormatter.format(selectedDate)}',
+      body: SingleChildScrollView(
+        child: Form(
+          key: _form,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  maxLength: 25,
+                  keyboardType: TextInputType.text,
+                  decoration: const InputDecoration(
+                      labelText: 'Title*', hintText: 'Food'),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a title';
+                    }
+                    title = value;
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Date: ${selectedDateFormatter.format(selectedDate)}',
+                      ),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.calendar_today),
-                    onPressed: () => _selectDate(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Time: ${selectedTime.format(context)}',
+                    IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: () => _selectDate(context),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.access_time),
-                    onPressed: () => _selectTime(context),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Row(
-                children: [
-                  //Here instead of price, add a text widget which automatically calculates the total
-                  //as the items are added. do not display this textbox if no items are added
-                  //below it, we have a drop down box to select who paid for the items
-                  Expanded(
-                    child: (price != 0.0)
-                        ? Text('Total spent: $price')
-                        : const Text('Total spent: 0'),
-                  ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Time: ${selectedTime.format(context)}',
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.access_time),
+                      onPressed: () => _selectTime(context),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  children: [
+                    //Here instead of price, add a text widget which automatically calculates the total
+                    //as the items are added. do not display this textbox if no items are added
+                    //below it, we have a drop down box to select who paid for the items
+                    Expanded(
+                      child: (items.isNotEmpty)
+                          ? Text('Total spent: ${calculateTotalPrice()}')
+                          : const Text('Total spent: 0'),
+                    ),
 
-                  const SizedBox(width: 3),
-/*
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: DropdownButton<String>(
-                      value: selectedUser,
-                      hint: const Text('Select a member'),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          selectedUser = newValue!;
-                        });
-                      },
-                      items: widget.group.users.map<DropdownMenuItem<String>>(
-                          (Map<String, String> user) {
-                        return DropdownMenuItem<String>(
-                          value: user['id'],
-                          child: Text(user['nickname']!),
-                        );
-                      }).toList(),
-                    ),
-                  ),*/
-                  Expanded(
-                    child: Padding(
+                    const SizedBox(width: 3),
+                    /*
+                    Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: DropdownButtonFormField<String>(
-                        decoration: InputDecoration(
-                          labelText: 'Who paid the bill?',
-                          border: const OutlineInputBorder(),
-                          filled: true,
-                          fillColor: Colors.grey[200],
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 12),
-                        ),
+                      child: DropdownButton<String>(
                         value: selectedUser,
+                        hint: const Text('Select a member'),
                         onChanged: (String? newValue) {
                           setState(() {
                             selectedUser = newValue!;
                           });
                         },
                         items: widget.group.users.map<DropdownMenuItem<String>>(
-                          (Map<String, String> user) {
-                            return DropdownMenuItem<String>(
-                              value: user['id'],
-                              child: Text(user['nickname']!),
-                            );
+                            (Map<String, String> user) {
+                          return DropdownMenuItem<String>(
+                            value: user['id'],
+                            child: Text(user['nickname']!),
+                          );
+                        }).toList(),
+                      ),
+                    ),*/
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: DropdownButtonFormField<String>(
+                          decoration: InputDecoration(
+                            labelText: 'Who paid the bill?',
+                            border: const OutlineInputBorder(),
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 12),
+                          ),
+                          value: selectedUser,
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedUser = newValue!;
+                            });
                           },
-                        ).toList(),
+                          items:
+                              widget.group.users.map<DropdownMenuItem<String>>(
+                            (Map<String, String> user) {
+                              return DropdownMenuItem<String>(
+                                value: user['id'],
+                                child: Text(user['nickname']!),
+                              );
+                            },
+                          ).toList(),
+                        ),
+                      ),
+                    ),
+
+                    /*Expanded(
+                      child: TextFormField(
+                        keyboardType:
+                            const TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(
+                            labelText: 'Amount*', hintText: '19.99'),
+                        inputFormatters: [
+                          FilteringTextInputFormatter
+                              .singleLineFormatter, // No line break
+                          FilteringTextInputFormatter.allow(
+                              RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
+                        ],
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please enter the price';
+                          }
+                          try {
+                            price = double.parse(value);
+                            return null; // Return null if parsing is successful
+                          } catch (e) {
+                            return 'Not a number';
+                          }
+                        },
+                      ),
+                    ),*/
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Center(
+                  child: ElevatedButton(
+                    style: const ButtonStyle(
+                      elevation: MaterialStatePropertyAll(6),
+                    ),
+                    onPressed: _submit,
+                    child: const Text(
+                      'Add',
+                      style: TextStyle(
+                        fontSize: 16,
                       ),
                     ),
                   ),
+                ),
+                const SizedBox(height: 5),
+                Divider(
+                  height: 20,
+                  thickness: 5,
+                  //indent: 20,
+                  //endIndent: 0,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+                const SizedBox(height: 5),
+                if (items.isNotEmpty)
+                  ListView(
+                    key: UniqueKey(), // Add this line
+                    shrinkWrap: true,
+                    children: List.generate(items.length, (index) {
+                      final item = items[index];
 
-                  /*Expanded(
-                    child: TextFormField(
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(
-                          labelText: 'Amount*', hintText: '19.99'),
-                      inputFormatters: [
-                        FilteringTextInputFormatter
-                            .singleLineFormatter, // No line break
-                        FilteringTextInputFormatter.allow(
-                            RegExp(r'^\d+\.?\d{0,2}$')), // Only double values
-                      ],
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Please enter the price';
-                        }
-                        try {
-                          price = double.parse(value);
-                          return null; // Return null if parsing is successful
-                        } catch (e) {
-                          return 'Not a number';
-                        }
-                      },
-                    ),
-                  ),*/
-                ],
-              ),
-              const SizedBox(height: 5),
-              Center(
-                child: ElevatedButton(
-                  style: const ButtonStyle(
-                    elevation: MaterialStatePropertyAll(6),
+                      return Card(
+                        elevation: 2,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: ListTile(
+                          title: Text(item.itemTitle),
+                          subtitle: Text(
+                              'Price: ${item.itemPrice.toStringAsFixed(2)}'),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              setState(() {
+                                items.removeAt(index);
+                              });
+                            },
+                          ),
+                        ),
+                      );
+                    }),
                   ),
-                  onPressed: _submit,
-                  child: const Text(
-                    'Add',
-                    style: TextStyle(
-                      fontSize: 16,
+                Center(
+                  child: ElevatedButton(
+                    style: const ButtonStyle(
+                      elevation: MaterialStatePropertyAll(6),
+                    ),
+                    onPressed: _addItem,
+                    child: const Text(
+                      'Add item',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 5),
-              Divider(
-                height: 20,
-                thickness: 5,
-                //indent: 20,
-                //endIndent: 0,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 5),
-              Center(
-                child: ElevatedButton(
-                  style: const ButtonStyle(
-                    elevation: MaterialStatePropertyAll(6),
-                  ),
-                  onPressed: _addItem,
-                  child: const Text(
-                    'Add item',
-                    style: TextStyle(
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

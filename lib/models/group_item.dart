@@ -7,5 +7,5 @@ class GroupItem {
 
   String itemTitle;
   double itemPrice;
-  List<Map<String, dynamic>> consumerProportions;
+  List<Map<String, dynamic>> consumerProportions; //id, share
 }
