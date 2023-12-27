@@ -13,4 +13,10 @@ class Group {
   final String groupName;
   List<Map<String, String>> users; //[{'id' = '', 'nickname'= ''}]
   final DateTime timestamp;
+
+  String getUserNicknameById(String userId) {
+    final user = users.firstWhere((user) => user['id'] == userId,
+        orElse: () => {'nickname': 'Unknown'});
+    return user['nickname'] ?? 'Unknown';
+  }
 }
