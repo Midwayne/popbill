@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:popbill/models/group.dart';
 import 'package:popbill/services/auth_services.dart';
+import 'package:popbill/widgets/split/split_page.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
 //To implement: The AllGroups page doesn't reload automatically even after adding
