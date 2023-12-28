@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:popbill/models/group.dart';
+import 'package:popbill/models/group_expense.dart';
+import 'package:popbill/models/group_item.dart';
 import 'package:popbill/models/user_expense.dart';
 
 class AuthService {
@@ -272,47 +274,28 @@ class AuthService {
   }
 
   void createGroup(BuildContext context, Group group) async {
-    try {
-      CollectionReference groupsCollection =
-          FirebaseFirestore.instance.collection('groups');
+    CollectionReference groupsCollection =
+        FirebaseFirestore.instance.collection('groups');
 
-      await groupsCollection.doc(group.groupId).set({
+    await groupsCollection.doc(group.groupId).set({
+      'id': group.groupId,
+      'name': group.groupName,
+      'users': group.users,
+      'timestamp': group.timestamp.toString(),
+    });
+
+    group.users.forEach((user) async {
+      CollectionReference usersCollection = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user['id'])
+          .collection('groups');
+
+      await usersCollection.doc(group.groupId).set({
         'id': group.groupId,
         'name': group.groupName,
         'users': group.users,
-        'timestamp': group.timestamp.toString(),
       });
-
-      group.users.forEach((user) async {
-        CollectionReference usersCollection = FirebaseFirestore.instance
-            .collection('users')
-            .doc(user['id'])
-            .collection('groups');
-
-        await usersCollection.doc(group.groupId).set({
-          'id': group.groupId,
-          'name': group.groupName,
-          'users': group.users,
-        });
-      });
-
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Group created.'),
-        ),
-      );
-    } catch (e) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).clearSnackBars();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'An unexpected error occurred while creating expense.\nPlease try again'),
-        ),
-      );
-    }
+    });
   }
 
   Future<List<Group>> getGroups() async {
@@ -379,6 +362,97 @@ class AuthService {
       return groups;
     } catch (error) {
       return groups;
+    }
+  }
+
+  void addGroupExpense(GroupExpense expense) async {
+    CollectionReference groupsTransactionReference = FirebaseFirestore.instance
+        .collection('groups')
+        .doc(expense.groupId)
+        .collection('transactions');
+
+    Map<String, dynamic> expenseData = {
+      'groupId': expense.groupId,
+      'expenseId': expense.expenseId,
+      'title': expense.title,
+      'totalAmount': expense.totalAmount,
+      'paidBy': expense.paidBy,
+      'date': {
+        'day': expense.date.day,
+        'month': expense.date.month,
+        'year': expense.date.year,
+      },
+      'time': {
+        'hour': expense.time.hour,
+        'minute': expense.time.minute,
+      },
+      'items': expense.items
+          .map((item) => {
+                'itemTitle': item.itemTitle,
+                'itemPrice': item.itemPrice,
+                'itemQuantity': item.itemQuantity,
+                'consumerProportions': item.consumerProportions,
+              })
+          .toList(),
+    };
+
+    await groupsTransactionReference.doc(expense.expenseId).set(expenseData);
+  }
+
+  Future<List<GroupExpense>> getGroupExpenses(String groupId) async {
+    try {
+      CollectionReference groupsCollection =
+          FirebaseFirestore.instance.collection('groups');
+
+      CollectionReference groupsTransactionReference =
+          groupsCollection.doc(groupId).collection('transactions');
+
+      QuerySnapshot expensesSnapshot = await groupsTransactionReference.get();
+
+      List<GroupExpense> expenses = [];
+
+      for (var expenseDoc in expensesSnapshot.docs) {
+        var expenseData = expenseDoc.data() as Map<String, dynamic>;
+
+        GroupExpense expense = GroupExpense(
+          groupId: expenseData['groupId'],
+          expenseId: expenseData['expenseId'],
+          title: expenseData['title'],
+          totalAmount: expenseData['totalAmount'],
+          paidBy: expenseData['paidBy'],
+          date: DateTime(
+            expenseData['date']['year'],
+            expenseData['date']['month'],
+            expenseData['date']['day'],
+          ),
+          time: TimeOfDay(
+            hour: expenseData['time']['hour'],
+            minute: expenseData['time']['minute'],
+          ),
+          items: (expenseData['items'] as List<dynamic>).map((item) {
+            return GroupItem(
+              itemTitle: item['itemTitle'],
+              itemPrice: item['itemPrice'],
+              itemQuantity: item['itemQuantity'],
+              consumerProportions:
+                  (item['consumerProportions'] as List<dynamic>)
+                      .map((consumer) {
+                return {
+                  'id': consumer['id'],
+                  'share': consumer['share'],
+                };
+              }).toList(),
+            );
+          }).toList(),
+        );
+
+        expenses.add(expense);
+      }
+
+      return expenses;
+    } catch (error) {
+      print(error);
+      return [];
     }
   }
 }

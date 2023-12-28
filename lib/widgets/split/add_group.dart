@@ -3,7 +3,7 @@ import 'package:popbill/models/group.dart';
 import 'package:popbill/services/auth_services.dart';
 import 'package:simple_barcode_scanner/simple_barcode_scanner.dart';
 
-//To implement: The page doesn't reload automatically even after adding
+//To implement: The AllGroups page doesn't reload automatically even after adding
 // Build edit nickname feature
 
 class AddGroup extends StatefulWidget {
@@ -110,11 +110,20 @@ class _AddGroupState extends State<AddGroup> {
 
   //Remove isn't built yet
   void removeUserFromGroup(String userId, String nickname) {
-    setState(() {
-      userIDs.remove(userId);
-      nicknames.remove(nickname);
-      users.removeWhere((map) => map['id'] == userId);
-    });
+    if (userId != currentUserId) {
+      setState(() {
+        userIDs.remove(userId);
+        nicknames.remove(nickname);
+        users.removeWhere((map) => map['id'] == userId);
+      });
+    } else {
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You cannot remove yourself from the group.'),
+        ),
+      );
+    }
   }
 
   void createGroup() async {
@@ -139,7 +148,27 @@ class _AddGroupState extends State<AddGroup> {
     _form.currentState!.save();
 
     Group finalUsers = Group(groupName: groupName, users: users);
-    AuthService().createGroup(context, finalUsers);
+    try {
+      AuthService().createGroup(context, finalUsers);
+      widget.reloadPage();
+      Navigator.of(context).pop();
+
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Group created'),
+        ),
+      );
+    } catch (error) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).clearSnackBars();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'An unexpected error occurred while creating expense.\nPlease try again'),
+        ),
+      );
+    }
 
     widget.reloadPage();
   }

@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 import 'package:popbill/models/group.dart';
 import 'package:popbill/models/group_item.dart';
 import 'package:popbill/models/group_expense.dart';
+import 'package:popbill/services/auth_services.dart';
+import 'package:popbill/widgets/split/group_page.dart';
 
 class AddGroupExpense extends StatefulWidget {
   const AddGroupExpense({Key? key, required this.group}) : super(key: key);
@@ -66,7 +68,45 @@ class _AddGroupExpenseState extends State<AddGroupExpense> {
     }
   }
 
-  void _submit() {}
+  void _submit() async {
+    if (_form.currentState!.validate()) {
+      GroupExpense expense = GroupExpense(
+        groupId: widget.group.groupId,
+        title: title,
+        totalAmount: calculateTotalPrice(),
+        paidBy: selectedUser,
+        date: selectedDate,
+        time: selectedTime,
+        items: items,
+      );
+
+      try {
+        AuthService().addGroupExpense(expense);
+
+        Navigator.of(context).pop();
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => GroupPage(group: widget.group),
+          ),
+        );
+
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Expense added successfully!'),
+          ),
+        );
+      } catch (error) {
+        ScaffoldMessenger.of(context).clearSnackBars();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('An error occurred while adding the expense.'),
+          ),
+        );
+      }
+    }
+  }
 
   //Add logic for custom ratio/percentage selection later
   void _addItem() async {
