@@ -79,8 +79,8 @@ class _GroupPageState extends State<GroupPage> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    GroupExpenseDetail(expense: expenses[index]),
+                builder: (context) => GroupExpenseDetail(
+                    expense: expenses[index], group: widget.group),
               ),
             );
           },
