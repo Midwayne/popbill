@@ -17,9 +17,33 @@ class GroupExpenseDetail extends StatefulWidget {
 }
 
 class _GroupExpenseDetailState extends State<GroupExpenseDetail> {
+  Map<String, double> calculateTotalShares() {
+    Map<String, double> totalShares = {};
+
+    for (GroupItem item in widget.expense.items) {
+      for (Map<String, dynamic> consumer in item.consumerProportions) {
+        String? userId = consumer['id'];
+        double? share = consumer['share'];
+
+        if (userId != null && share != null) {
+          String nickname = widget.group.getUserNicknameById(userId);
+
+          if (totalShares.containsKey(nickname)) {
+            totalShares[nickname] = totalShares[nickname]! + share;
+          } else {
+            totalShares[nickname] = share;
+          }
+        }
+      }
+    }
+
+    return totalShares;
+  }
+
   @override
   Widget build(BuildContext context) {
     GroupExpense expense = widget.expense;
+    Map<String, double> totalShares = calculateTotalShares();
 
     return Scaffold(
       appBar: AppBar(
@@ -34,9 +58,22 @@ class _GroupExpenseDetailState extends State<GroupExpenseDetail> {
             Text('Date: ${expense.formattedDate}'),
             SizedBox(height: 8.0),
             // Add time here
+            Text('Time: ${widget.expense.time.format(context)}'),
+            SizedBox(height: 8.0),
+
             Text('Total Amount: Rs. ${expense.totalAmount.toStringAsFixed(2)}'),
             SizedBox(height: 16.0),
-            // Add the total amount of each user here
+
+            Text('Total Shares:'),
+            SizedBox(height: 8.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: totalShares.entries.map((entry) {
+                return Text('${entry.key}: ${entry.value.toStringAsFixed(2)}');
+              }).toList(),
+            ),
+            SizedBox(height: 16.0),
+
             Text('Items and Shares:'),
             SizedBox(height: 8.0),
             Expanded(
