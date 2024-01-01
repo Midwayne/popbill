@@ -54,28 +54,61 @@ class _GroupExpenseDetailState extends State<GroupExpenseDetail> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: 8.0),
-            Text('Date: ${expense.formattedDate}'),
-            SizedBox(height: 8.0),
-            // Add time here
-            Text('Time: ${widget.expense.time.format(context)}'),
-            SizedBox(height: 8.0),
-
-            Text('Total Amount: Rs. ${expense.totalAmount.toStringAsFixed(2)}'),
+            Row(
+              children: [
+                Text('Date: ${expense.formattedDate}'),
+                const Spacer(),
+                Text('Time: ${widget.expense.time.format(context)}'),
+              ],
+            ),
             SizedBox(height: 16.0),
 
-            Text('Total Shares:'),
-            SizedBox(height: 8.0),
-            Column(
+            Text('Total Amount: Rs. ${expense.totalAmount.toStringAsFixed(2)}'),
+
+            Text(
+                'Paid by: ${widget.group.getUserNicknameById(expense.paidBy)}'),
+
+            /*Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: totalShares.entries.map((entry) {
                 return Text('${entry.key}: ${entry.value.toStringAsFixed(2)}');
               }).toList(),
+            ),*/
+            const Divider(
+              color: Colors.black, // You can specify the color you want
+              thickness: 1.0, // You can adjust the thickness of the line
+              height: 20.0, // You can adjust the height of the line
             ),
-            SizedBox(height: 16.0),
 
-            Text('Items and Shares:'),
-            SizedBox(height: 8.0),
+            Center(
+              child: Column(
+                children: [
+                  const Text('Total Shares'),
+                  DataTable(
+                    columns: const [
+                      DataColumn(label: Text('User')),
+                      DataColumn(label: Text('Amount')),
+                    ],
+                    rows: totalShares.entries.map((entry) {
+                      return DataRow(cells: [
+                        DataCell(Text(entry.key)),
+                        DataCell(Text(entry.value.toStringAsFixed(2))),
+                      ]);
+                    }).toList(),
+                  ),
+                ],
+              ),
+            ),
+
+            //const SizedBox(height: 16.0),
+            const Divider(
+              color: Colors.black, // You can specify the color you want
+              thickness: 1.0, // You can adjust the thickness of the line
+              height: 20.0, // You can adjust the height of the line
+            ),
+
+            const Center(child: Text('Items and Shares')),
+            const SizedBox(height: 8.0),
             Expanded(
               child: ListView.builder(
                 itemCount: expense.items.length,
@@ -99,7 +132,7 @@ class _GroupExpenseDetailState extends State<GroupExpenseDetail> {
                           Row(
                             children: [
                               Text('Quantity: ${item.itemQuantity.toString()}'),
-                              Spacer(),
+                              const Spacer(),
                               Text(
                                   'Price: ${item.itemPrice.toStringAsFixed(2)}'),
                             ],
