@@ -75,9 +75,9 @@ class _GroupExpenseDetailState extends State<GroupExpenseDetail> {
               }).toList(),
             ),*/
             const Divider(
-              color: Colors.black, // You can specify the color you want
-              thickness: 1.0, // You can adjust the thickness of the line
-              height: 20.0, // You can adjust the height of the line
+              color: Colors.black,
+              thickness: 1.0,
+              height: 20.0,
             ),
 
             Center(
@@ -102,9 +102,9 @@ class _GroupExpenseDetailState extends State<GroupExpenseDetail> {
 
             //const SizedBox(height: 16.0),
             const Divider(
-              color: Colors.black, // You can specify the color you want
-              thickness: 1.0, // You can adjust the thickness of the line
-              height: 20.0, // You can adjust the height of the line
+              color: Colors.black,
+              thickness: 1.0,
+              height: 20.0,
             ),
 
             const Center(child: Text('Items and Shares')),

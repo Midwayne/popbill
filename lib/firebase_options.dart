@@ -3,6 +3,7 @@
 import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
+import 'package:popbill/config.dart';
 
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
@@ -50,19 +51,19 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCeQccg8sbq5M0dnFxSBl6w9oRRF6Mhw_E',
-    appId: '1:743172680177:android:53f6dbb1f306de71c8fc50',
-    messagingSenderId: '743172680177',
-    projectId: 'popbill-prototype',
-    storageBucket: 'popbill-prototype.appspot.com',
+    apiKey: FirebaseConfig.androidApiKey,
+    appId: FirebaseConfig.androidAppId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+    storageBucket: FirebaseConfig.storageBucket,
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBG45rp-Ub34M3jIQCw2Bpgkm6BB6VTDYc',
-    appId: '1:743172680177:ios:bcf57cbdb43cafb9c8fc50',
-    messagingSenderId: '743172680177',
-    projectId: 'popbill-prototype',
-    storageBucket: 'popbill-prototype.appspot.com',
-    iosBundleId: 'com.example.popbill',
+    apiKey: FirebaseConfig.androidApiKey,
+    appId: FirebaseConfig.androidAppId,
+    messagingSenderId: FirebaseConfig.messagingSenderId,
+    projectId: FirebaseConfig.projectId,
+    storageBucket: FirebaseConfig.storageBucket,
+    iosBundleId: FirebaseConfig.iosBundleId,
   );
 }
