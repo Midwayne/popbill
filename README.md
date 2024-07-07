@@ -11,10 +11,6 @@ PopBill is a Flutter application designed to help users manage and track both gr
 - Track individual shares for each item within a group expense.
 - View detailed reports, including total shares for each user and expense date.
 
-## Screenshots
-
-Include screenshots or GIFs showcasing the main features of your app. You can create a separate folder for images and reference them in your README.
-
 ## Getting Started
 
 To run this project locally, follow these steps:
